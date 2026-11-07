@@ -32,6 +32,7 @@ jobs:
               "server_side": "required",
               "source_url": "https://github.com/Creeperhouse999/realistic-water-optimized",
               "issues_url": "https://github.com/Creeperhouse999/realistic-water-optimized/issues",
+              "license_id": "LicenseRef-Realistic-Water-License",
               "license_url": "https://github.com/Creeperhouse999/realistic-water-optimized/blob/main/LICENSE",
           }
           req = urllib.request.Request(
@@ -52,3 +53,15 @@ jobs:
             --data-binary @.github/modrinth/icon.png)
           cat /tmp/out.txt; echo; echo "icon: HTTP $code"
           [ "$code" -lt 300 ]
+
+      - name: Show what Modrinth has
+        if: env.MODRINTH_TOKEN != '' && env.PROJECT != ''
+        run: |
+          curl -s "https://api.modrinth.com/v2/project/$PROJECT" -H "Authorization: $MODRINTH_TOKEN" -H "User-Agent: $UA"             | python3 -c "
+          import json, sys
+          d = json.load(sys.stdin)
+          for k in ('title', 'slug', 'status', 'categories', 'client_side', 'server_side', 'license', 'source_url', 'issues_url', 'icon_url', 'versions', 'monetization_status'):
+              print(k, '=', d.get(k))
+          body = d.get('body') or ''
+          print('body length =', len(body), '| AI note:', 'Made with AI' in body, '| credits Skaffy:', 'sskaffy/Realistic-Water' in body)
+          "
