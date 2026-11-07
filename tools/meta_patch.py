@@ -12,7 +12,8 @@ mod_path = os.path.join(root, "fabric.mod.json")
 with open(mod_path, encoding="utf8") as f:
     mod = json.load(f)
 
-mod["version"] = "1.3-perf." + preset
+VERSION = "1.3-perf.2"
+mod["version"] = VERSION if preset == "tsunami" else VERSION + "-" + preset
 mod["name"] = "Realistic Water - OPTIMIZED"
 mod["description"] = (
     "MODIFIED, unofficial performance fork of Realistic Water by Skaffy "
