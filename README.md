@@ -1,4 +1,4 @@
-# Realistic Water: Performance Fork
+# Realistic Water - OPTIMIZED
 
 > **This is a modified, unofficial version of [Realistic Water](https://github.com/sskaffy/Realistic-Water) by Skaffy. It is not the original mod.**
 > All credit for the simulation, rendering and the mod itself goes to **Skaffy**. This fork only changes defaults, adds a control panel and makes big floods run on ordinary gaming hardware.
@@ -81,13 +81,10 @@ How it works:
 
 ## Install
 1. Install [Fabric](https://fabricmc.net/) for Minecraft 26.3 and [Fabric API](https://modrinth.com/mod/fabric-api).
-2. Download a jar from [Releases](../../releases):
-   - `realistic-water-1.3-tsunami.jar`: recommended
-   - `realistic-water-1.3-lowend.jar`: lightest defaults
-   - `realistic-water-1.3-balanced.jar`: finer water with foam by default
+2. Download `realistic-water-optimized-1.3-perf.2.jar` from [Releases](../../releases).
 3. Put it in `mods/`, **instead of** the original Realistic Water jar (not next to it).
 
-The jars only differ in their starting defaults; every preset is available in the panel in all of them.
+It starts on the Tsunami preset; every other preset is one click away in the control panel (`K`).
 
 ## Building
 See [docs/BUILDING.md](docs/BUILDING.md). Short version: unpack the original 1.3 jar into `extracted/`, point `tools/cp.txt` at your Minecraft and library jars, run `sh tools/build.sh`.

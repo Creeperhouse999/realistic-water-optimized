@@ -13,7 +13,7 @@ with open(mod_path, encoding="utf8") as f:
     mod = json.load(f)
 
 mod["version"] = "1.3-perf." + preset
-mod["name"] = "Realistic Water (Performance Fork)"
+mod["name"] = "Realistic Water - OPTIMIZED"
 mod["description"] = (
     "MODIFIED, unofficial performance fork of Realistic Water by Skaffy "
     "(original: https://github.com/sskaffy/Realistic-Water). "
