@@ -1,5 +1,7 @@
 # Realistic Water - OPTIMIZED
 
+> **Made with AI.** The code in this fork is written with [Claude](https://claude.com/claude-code) (Anthropic's AI). Every change is still reviewed, built, checked by the offline tests (`sh tools/test.sh`) and tested in game by the maintainer before it goes into a release. Changes not yet tested in game are labelled `untested` in the issues.
+
 > **This is a modified, unofficial version of [Realistic Water](https://github.com/sskaffy/Realistic-Water) by Skaffy. It is not the original mod.**
 > All credit for the simulation, rendering and the mod itself goes to **Skaffy**. This fork only changes defaults, adds a control panel and makes big floods run on ordinary gaming hardware.
 > Distributed under the original mod's license (see [LICENSE](LICENSE)). Free, never sold, never paywalled.
@@ -95,6 +97,7 @@ Use the [issue templates](../../issues/new/choose). Please include `/water stats
 ## Credits
 - **Skaffy**: [Realistic Water](https://github.com/sskaffy/Realistic-Water), the original mod and everything that makes the water real.
 - This fork: presets, control panel, Auto FPS, world conversion, ocean sink, render scaling.
+  Maintained and tested by **Creeperhouse999**, code written with **Claude** (Anthropic).
 
 ## License
 Same license as the original mod, notice kept intact: [LICENSE](LICENSE). In short: free to use and include in modpacks; forks must credit Skaffy, link the original and say they're modified; nothing may be sold or paywalled.
