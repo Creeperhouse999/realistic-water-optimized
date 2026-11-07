@@ -135,6 +135,20 @@ Game rules under **Create World → More → Game Rules → Realistic Water**, i
 | [Sodium](https://modrinth.com/mod/sodium) | Optional: adds a Realistic Water page to the video settings |
 | Graphics | A GPU with Vulkan support (the simulation runs on the GPU) |
 
+### Tested on
+
+| | |
+|---|---|
+| Laptop | MSI Katana 15 B13VGK |
+| CPU | Intel Core i7-13620H (10 cores, 16 threads) |
+| GPU | NVIDIA GeForce RTX 4070 Laptop GPU, 8 GB |
+| RAM | 16 GB |
+| Display | 3840×2160, 240 Hz |
+| OS | Windows 11 Pro |
+
+All FPS numbers in this README are from this machine. Results on other hardware are welcome in the
+[performance issue form](../../issues/new/choose).
+
 ## Install
 
 1. Install [Fabric Loader](https://fabricmc.net/use/installer/) for Minecraft **26.3** (or create a Fabric
