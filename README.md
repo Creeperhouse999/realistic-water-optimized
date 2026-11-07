@@ -10,7 +10,7 @@ Auto FPS that keeps your frame rate, and an option to turn the lakes of your wor
 [![Fabric](https://img.shields.io/badge/Loader-Fabric-DBD0B4?style=flat-square)](https://fabricmc.net/use/installer/)
 [![Requires Fabric API](https://img.shields.io/badge/Requires-Fabric%20API-3B3B3B?style=flat-square)](https://modrinth.com/mod/fabric-api)
 [![Based on Realistic Water 1.3](https://img.shields.io/badge/Based%20on-Realistic%20Water%201.3-2E86C1?style=flat-square)](https://github.com/sskaffy/Realistic-Water)
-[![Release 1.3-perf.2](https://img.shields.io/badge/Release-1.3--perf.2-5865F2?style=flat-square)](../../releases)
+[![Release 1.3-perf.3](https://img.shields.io/badge/Release-1.3--perf.3-5865F2?style=flat-square)](../../releases)
 [![Modrinth](https://img.shields.io/badge/Modrinth-Realistic%20Water%20OPTIMIZED-1BD96A?style=flat-square&logo=modrinth&logoColor=white)](https://modrinth.com/mod/realistic-water-optimized)
 [![Made with Claude](https://img.shields.io/badge/Made%20with-Claude-D97757?style=flat-square)](https://claude.com/claude-code)
 
@@ -200,6 +200,7 @@ the cost.
 |---|---|---|
 | **1.3-perf.1** | Cheaper defaults, half-resolution passes, ocean sink, first control panel and Auto FPS | ✅ Released |
 | **1.3-perf.2** | Tabbed panel, presets, Ocean preset, realistic world rules, memory guard, Auto FPS fixes | ✅ Released |
+| **1.3-perf.3** | Auto FPS no longer bursts full tanks when changing water detail | ✅ Released |
 | **next** | In-game checks of the 🧪 items, sand simulations that grow too big ([#5](../../issues/5)), taller underground fountains ([#6](../../issues/6)) | 🗓️ Planned |
 | **later** | Memory-guard tuning for 4–6 GB cards ([#4](../../issues/4)), Quality preset testing on a stronger PC | 🗓️ Planned |
 

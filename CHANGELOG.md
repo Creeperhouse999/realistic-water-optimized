@@ -2,6 +2,13 @@
 
 All versions are forks of Realistic Water **1.3** by Skaffy for Minecraft 26.3.
 
+## 1.3-perf.3 (2026-11-07)
+### Fixed
+- Full tanks of water could burst through their glass walls when Auto FPS changed water detail: a resolution change rebuilds all water from blocks. Auto FPS now only changes water detail when no realistic water is simulated at all, and never forces it (it still has view distance, physics steps, surface detail and foam).
+
+### Changed
+- Shorter help texts in the control panel, each fits on two lines.
+
 ## 1.3-perf.2 (2026-11-07)
 ### Added
 - Tabbed control panel (Home, Auto FPS, World, Water, Materials, All settings). It replaces the original settings list: `K`, `/waterpanel`, `/water gui` and both Sodium buttons open it.
@@ -12,7 +19,7 @@ All versions are forks of Realistic Water **1.3** by Skaffy for Minecraft 26.3.
 - Offline tests (`sh tools/test.sh`): presets, panel setting names, patched defaults, stats parsing, memory guard.
 
 ### Fixed
-- Water vanished, and full tanks burst through their walls, when Auto FPS changed water detail (a resolution change rebuilds all water). Auto FPS now only changes water detail when no realistic water is simulated at all.
+- Water vanished while Auto FPS changed quality: water detail now only changes while no water is moving.
 - Auto FPS could leave its temporary settings in options.txt and the water settings file (closing the panel saved them; a crash kept them). Your own settings are now also stored in the panel config while Auto FPS runs and come back after a crash. Water settings you change while Auto FPS is on are kept for when it is off.
 - Auto FPS climbed above your own water settings while the water was calm (up to resolution 4 with foam), so the next flood crashed it to the lowest level. It now never goes above your own water settings.
 - An ocean next to a lake could block that lake from converting (the skip list was per chunk, now per block).

@@ -3,7 +3,7 @@
 # and deciding to publish. Needs the GitHub CLI (gh) logged in.
 #
 #   sh tools/github_setup.sh OWNER/REPO            create labels and issues only
-#   sh tools/github_setup.sh OWNER/REPO --release  also upload the jar as release v1.3-perf.2 (draft)
+#   sh tools/github_setup.sh OWNER/REPO --release  also upload the jar as release v1.3-perf.3 (draft)
 #
 # It never pushes code: push the branch and tags yourself with
 #   git remote add origin https://github.com/OWNER/REPO.git
@@ -34,8 +34,8 @@ done
 if [ "$2" = "--release" ]; then
   echo "== draft release"
   # One jar: the Tsunami build. Every preset is available in its control panel.
-  cp realistic-water-1.3-tsunami.jar realistic-water-optimized-1.3-perf.2.jar
-  gh release create v1.3-perf.2 -R "$REPO" --draft --title "Realistic Water - OPTIMIZED 1.3-perf.2" --notes-file docs/releases/v1.3-perf.2.md \
-    realistic-water-optimized-1.3-perf.2.jar
+  cp realistic-water-1.3-tsunami.jar realistic-water-optimized-1.3-perf.3.jar
+  gh release create v1.3-perf.3 -R "$REPO" --draft --title "Realistic Water - OPTIMIZED 1.3-perf.3" --notes-file docs/releases/v1.3-perf.3.md \
+    realistic-water-optimized-1.3-perf.3.jar
 fi
 echo done
