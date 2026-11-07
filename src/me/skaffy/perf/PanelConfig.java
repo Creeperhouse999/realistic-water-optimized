@@ -36,6 +36,8 @@ public final class PanelConfig {
    public static Adjust adjust = Adjust.BOTH;
    public static boolean notify = true;
    public static String preset = WaterPresets.Preset.TSUNAMI.name();
+   /** Set once the old Page Up key binding has been moved to K, so a deliberate Page Up binding is kept. */
+   public static boolean keyMigrated = false;
 
    private PanelConfig() {
    }
@@ -61,6 +63,7 @@ public final class PanelConfig {
       autoFps = Boolean.parseBoolean(p.getProperty("autoFps", String.valueOf(autoFps)));
       notify = Boolean.parseBoolean(p.getProperty("notify", String.valueOf(notify)));
       preset = p.getProperty("preset", preset);
+      keyMigrated = Boolean.parseBoolean(p.getProperty("keyMigrated", "false"));
       try {
          targetFps = clamp(Integer.parseInt(p.getProperty("targetFps", String.valueOf(targetFps))), 20, 240);
       } catch (NumberFormatException ignored) {
@@ -79,6 +82,7 @@ public final class PanelConfig {
       p.setProperty("adjust", adjust.name());
       p.setProperty("notify", String.valueOf(notify));
       p.setProperty("preset", preset);
+      p.setProperty("keyMigrated", String.valueOf(keyMigrated));
       Path file = file();
       try {
          Files.createDirectories(file.getParent());

@@ -193,6 +193,10 @@ public class ControlPanelScreen extends OptionsSubScreen {
       this.note(WaterPresets.current().description);
 
       this.heading("Quick settings");
+      if (PanelConfig.autoFps) {
+         this.note("Auto FPS is on: it manages view distance and water detail, so changes here are temporary.");
+      }
+
       this.list.addSmall(this.options.renderDistance(), this.options.simulationDistance());
       this.list.addSmall(this.options.framerateLimit(), this.options.enableVsync());
       this.list.addSmall(this.setting("resolution"), this.setting("whitewater"));
@@ -257,13 +261,13 @@ public class ControlPanelScreen extends OptionsSubScreen {
       this.heading("Realistic world");
       this.note("Turns vanilla water, lava and falling sand near players into realistic ones, a few hundred blocks a second.");
       IntegratedServer server = this.minecraft.getSingleplayerServer();
-      if (server == null) {
+      if (server == null || server.overworld() == null) {
          this.note("Only in singleplayer from here. On a server use /gamerule realistic-water:convert_water true.");
          this.note("For a new world: Create World, More, Game Rules, Realistic Water.");
          return;
       }
 
-      this.list.addSmall(this.ruleToggle(server, "Water", WorldConversion.CONVERT_WATER, "Oceans, lakes, rivers and waterfalls become realistic water."),
+      this.list.addSmall(this.ruleToggle(server, "Water", WorldConversion.CONVERT_WATER, "Water source blocks (oceans, lakes, rivers, tops of waterfalls) become realistic water."),
          this.ruleToggle(server, "Lava", WorldConversion.CONVERT_LAVA, "Lava lakes and lava falls become realistic lava."));
       this.list.addSmall(this.ruleToggle(server, "Falling sand", WorldConversion.CONVERT_SAND, "Sand with nothing solid under it becomes realistic sand."),
          new RuleSlider(server, "Radius", WorldConversion.RADIUS, 4, 48, "Blocks around each player that get converted. Bigger = much heavier."));
@@ -376,12 +380,22 @@ public class ControlPanelScreen extends OptionsSubScreen {
 
    private Component waterStatusText() {
       long simulated = SafeResolution.countSimulated();
-      String s = WaterWorld.get().statsLine();
+      String s;
+      try {
+         s = WaterWorld.get().statsLine();
+      } catch (RuntimeException e) {
+         return Component.literal("No water data").withStyle(ChatFormatting.GRAY);
+      }
+
       int cut = s.indexOf("frame ");
       String frame = "";
       if (cut >= 0) {
          int end = s.indexOf(" ms", cut);
          frame = end > 0 ? "  |  " + s.substring(cut, end + 3) : "";
+      }
+
+      if (simulated < 0) {
+         return Component.literal("No water data").withStyle(ChatFormatting.GRAY);
       }
 
       if (simulated == 0) {
@@ -472,6 +486,11 @@ public class ControlPanelScreen extends OptionsSubScreen {
       @Override
       protected void applyValue() {
          PanelConfig.targetFps = this.picked();
+      }
+
+      @Override
+      public void onRelease(net.minecraft.client.input.MouseButtonEvent event) {
+         super.onRelease(event);
          PanelConfig.save();
       }
    }

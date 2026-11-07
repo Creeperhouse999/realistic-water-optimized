@@ -79,10 +79,14 @@ public final class PerfClient implements ClientModInitializer {
          // Version 1 of the fork registered the key with a GLFW code, which Minecraft 26.3 reads as Page Up.
          // Move players who never rebound it to K.
          keyChecked = true;
-         if ("key.keyboard.page.up".equals(openPanel.saveString())) {
-            openPanel.setKey(openPanel.getDefaultKey());
-            KeyMapping.resetMapping();
-            mc.options.save();
+         if (!PanelConfig.keyMigrated) {
+            PanelConfig.keyMigrated = true;
+            PanelConfig.save();
+            if ("key.keyboard.page.up".equals(openPanel.saveString())) {
+               openPanel.setKey(openPanel.getDefaultKey());
+               KeyMapping.resetMapping();
+               mc.options.save();
+            }
          }
       }
 
@@ -108,8 +112,12 @@ public final class PerfClient implements ClientModInitializer {
       } catch (RuntimeException e) {
          // Never let the governor take the game down; switch it off instead.
          me.skaffy.RealisticWater.LOGGER.error("Auto FPS failed, turning it off", e);
-         PanelConfig.autoFps = false;
-         PanelConfig.save();
+         try {
+            AutoFps.setEnabled(false); // restores the player's own settings
+         } catch (RuntimeException e2) {
+            PanelConfig.autoFps = false;
+            PanelConfig.save();
+         }
       }
    }
 }

@@ -15,7 +15,7 @@ All versions are forks of Realistic Water **1.3** by Skaffy for Minecraft 26.3.
 - The Quality preset could switch the simulation off on big floods (1.2 GB GPU buffer). Quality now uses resolution 5 and the memory guard.
 
 ### Changed
-- Sand looks fuller at the same cost: 16 grains drawn per particle (was 8), slightly bigger grains, smoother pile surface.
+- Sand looks fuller for a small drawing cost: 16 grains drawn per particle (was 8), slightly bigger grains, smoother pile surface.
 - Shorter panel button labels.
 - The Sodium page shows the panel buttons and 7 headline settings instead of 19 pages of raw options.
 

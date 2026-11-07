@@ -17,7 +17,7 @@ public final class SafeResolution {
    /** Settings whose change triggers a full rebuild in WaterWorld.tick. */
    static final java.util.Set<String> REBUILDING = java.util.Set.of("resolution", "lavaResolution", "slimeResolution", "sandResolution", "leafResolution");
 
-   private static final Pattern NUMBER = Pattern.compile("(?:fluid|particles|leaves) ([\\d,]+)");
+   private static final Pattern NUMBER = Pattern.compile("(?:fluid|particles|leaves) (\\S+)");
    private static final Map<String, String> pending = new LinkedHashMap<>();
    private static long lastCheck;
    private static boolean lastIdle = true;
@@ -47,6 +47,11 @@ public final class SafeResolution {
       return queued != null ? queued : WaterPresets.get(name);
    }
 
+   /** A manual change of the same setting wins over a queued Auto FPS change. */
+   public static void cancel(String name) {
+      pending.remove(name);
+   }
+
    public static boolean hasPending() {
       return !pending.isEmpty();
    }
@@ -57,7 +62,7 @@ public final class SafeResolution {
          return;
       }
 
-      for (Map.Entry<String, String> e : pending.entrySet()) {
+      for (Map.Entry<String, String> e : java.util.List.copyOf(pending.entrySet())) {
          WaterPresets.set(e.getKey(), e.getValue());
       }
 
@@ -67,7 +72,7 @@ public final class SafeResolution {
 
    /** Applies all queued changes right away (game closing, so a rebuild does not matter). */
    public static void flush() {
-      for (Map.Entry<String, String> e : pending.entrySet()) {
+      for (Map.Entry<String, String> e : java.util.List.copyOf(pending.entrySet())) {
          WaterPresets.set(e.getKey(), e.getValue());
       }
 
@@ -82,7 +87,7 @@ public final class SafeResolution {
       }
 
       lastCheck = now;
-      lastIdle = countSimulated() == 0;
+      lastIdle = countSimulated() == 0; // -1 (unknown) counts as busy
       return lastIdle;
    }
 
@@ -91,14 +96,18 @@ public final class SafeResolution {
       try {
          line = WaterWorld.get().statsLine();
       } catch (RuntimeException e) {
-         return 0;
+         return -1;
       }
 
       long total = 0;
       Matcher m = NUMBER.matcher(line);
       while (m.find()) {
          try {
-            total += Long.parseLong(m.group(1).replace(",", ""));
+            // statsLine formats with the default locale: 1,234 / 1.234 / 1 234. Keep only the digits.
+            String digits = m.group(1).replaceAll("[^0-9]", "");
+            if (!digits.isEmpty()) {
+               total += Long.parseLong(digits);
+            }
          } catch (NumberFormatException ignored) {
          }
       }

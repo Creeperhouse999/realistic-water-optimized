@@ -143,6 +143,7 @@ public final class WaterPresets {
    }
 
    static void set(String name, String value) {
+      SafeResolution.cancel(name);
       try {
          WaterSettings.set(name, value);
       } catch (NumberFormatException | ReflectiveOperationException e) {

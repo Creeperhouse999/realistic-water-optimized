@@ -49,7 +49,8 @@ public final class WorldConversion implements ModInitializer {
       .category(CATEGORY)
       .buildAndRegister(Identifier.fromNamespaceAndPath("realistic-water", "convert_per_second"));
 
-   private static long tickCounter;
+   private static int lastServerTick = -1;
+   private static int usedThisTick;
 
    @Override
    public void onInitialize() {
@@ -65,10 +66,21 @@ public final class WorldConversion implements ModInitializer {
          return;
       }
 
+      // One budget per server tick, shared by all dimensions.
+      int serverTick = level.getServer().getTickCount();
+      if (serverTick != lastServerTick) {
+         lastServerTick = serverTick;
+         usedThisTick = 0;
+      }
+
       int radius = rules.get(RADIUS);
-      int budget = Math.max(1, rules.get(PER_SECOND) / 20);
+      int budget = Math.max(1, rules.get(PER_SECOND) / 20) - usedThisTick;
+      if (budget <= 0) {
+         return;
+      }
+
       int span = radius * 2 + 1;
-      long t = tickCounter++;
+      long t = level.getGameTime();
       for (ServerPlayer player : level.players()) {
          if (player.isSpectator()) {
             continue;
@@ -76,7 +88,9 @@ public final class WorldConversion implements ModInitializer {
 
          BlockPos center = player.blockPosition();
          int dy = (int)(t % span) - radius;
-         budget -= convertLayer(level, center, dy, radius, water, lava, sand, budget);
+         int done = convertLayer(level, center, dy, radius, water, lava, sand, budget);
+         usedThisTick += done;
+         budget -= done;
          if (budget <= 0) {
             return;
          }

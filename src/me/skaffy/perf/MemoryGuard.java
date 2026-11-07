@@ -18,7 +18,7 @@ public final class MemoryGuard {
    }
 
    public static int subdivision(int nx, int ny, int nz, int requested) {
-      int s = Math.max(1, requested);
+      int s = Math.max(1, Math.min(8, requested));
       long cells = (long)nx * ny * nz;
       while (s > 1 && cells * s * s * s > MAX_FINE_CELLS) {
          s--;
