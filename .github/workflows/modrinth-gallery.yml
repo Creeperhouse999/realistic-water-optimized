@@ -1,0 +1,54 @@
+name: Sync Modrinth gallery
+
+# Uploads the images listed in .github/modrinth/gallery.json to the Modrinth gallery.
+# Images already on Modrinth (same title) are skipped, so running it again never makes duplicates.
+# Only images the maintainer approved go into .github/modrinth/gallery/.
+on:
+  push:
+    branches: [main]
+    paths: [".github/modrinth/gallery.json", ".github/modrinth/gallery/**", ".github/workflows/modrinth-gallery.yml"]
+  workflow_dispatch:
+
+jobs:
+  gallery:
+    runs-on: ubuntu-latest
+    env:
+      MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+      PROJECT: ${{ vars.MODRINTH_PROJECT_ID }}
+      UA: Creeperhouse999/realistic-water-optimized (github-actions)
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Upload new gallery images
+        if: env.MODRINTH_TOKEN != '' && env.PROJECT != ''
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.parse, urllib.request
+          token, project, ua = os.environ["MODRINTH_TOKEN"], os.environ["PROJECT"], os.environ["UA"]
+          headers = {"Authorization": token, "User-Agent": ua}
+
+          req = urllib.request.Request(f"https://api.modrinth.com/v2/project/{project}", headers=headers)
+          with urllib.request.urlopen(req) as r:
+              existing = {g.get("title") for g in json.load(r).get("gallery", [])}
+          print("already on Modrinth:", len(existing))
+
+          items = json.load(open(".github/modrinth/gallery.json", encoding="utf-8"))
+          for order, item in enumerate(items):
+              if item["title"] in existing:
+                  print("skip", item["file"])
+                  continue
+              ext = item["file"].rsplit(".", 1)[1].lower()
+              q = urllib.parse.urlencode({
+                  "ext": ext,
+                  "featured": str(item.get("featured", False)).lower(),
+                  "title": item["title"],
+                  "description": item.get("description", ""),
+                  "ordering": order,
+              })
+              data = open(f".github/modrinth/gallery/{item['file']}", "rb").read()
+              ctype = "image/jpeg" if ext in ("jpg", "jpeg") else f"image/{ext}"
+              up = urllib.request.Request(f"https://api.modrinth.com/v2/project/{project}/gallery?{q}", data=data, method="POST",
+                                          headers={**headers, "Content-Type": ctype})
+              with urllib.request.urlopen(up) as r:
+                  print("uploaded", item["file"], r.status)
+          PY
