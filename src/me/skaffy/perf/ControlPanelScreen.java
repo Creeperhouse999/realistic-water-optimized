@@ -331,8 +331,13 @@ public class ControlPanelScreen extends OptionsSubScreen {
       return w;
    }
 
+   /** Gray help text. List rows have a fixed height, so long text becomes several two-line rows instead of being cut. */
    private void note(String text) {
-      this.list.addBig(new MultiLineTextWidget(Component.literal(text).withStyle(ChatFormatting.GRAY), this.font).setMaxWidth(310).setMaxRows(2));
+      List<net.minecraft.network.chat.FormattedText> lines = this.font.getSplitter().splitLines(text, 310, net.minecraft.network.chat.Style.EMPTY);
+      for (int i = 0; i < lines.size(); i += 2) {
+         String part = lines.get(i).getString() + (i + 1 < lines.size() ? " " + lines.get(i + 1).getString() : "");
+         this.list.addBig(new MultiLineTextWidget(Component.literal(part.strip()).withStyle(ChatFormatting.GRAY), this.font).setMaxWidth(310).setMaxRows(2));
+      }
    }
 
    /** A widget for one mod setting, built from the mod's own setting descriptions. Null if the setting doesn't exist. */

@@ -16,7 +16,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
@@ -71,10 +70,11 @@ public final class WorldConversion implements ModInitializer {
       .category(CATEGORY)
       .buildAndRegister(Identifier.fromNamespaceAndPath("realistic-water", "convert_max_body"));
 
-   /** Chunks where a body was too big (or not affordable yet) are not searched again until this game time. */
+   /** Blocks of a body that was too big (or not affordable yet) are not searched again until this game time. */
    private static final long RETRY_TOO_BIG_TICKS = 1200;
    private static final Direction[] FEEDS = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN};
    private static final Direction[] ALL = Direction.values();
+   private static final int MAX_SKIPPED = 400_000;
 
    private static final Map<ServerLevel, Long2LongOpenHashMap> skip = new WeakHashMap<>();
    private static int lastServerTick = -1;
@@ -137,6 +137,10 @@ public final class WorldConversion implements ModInitializer {
          skipped.long2LongEntrySet().removeIf(e -> e.getLongValue() <= now);
       }
 
+      if (skipped.size() > MAX_SKIPPED) {
+         skipped.clear(); // bounded memory; at worst a big body is searched once more
+      }
+
       int radius = rules.get(RADIUS);
       int span = radius * 2 + 1;
       // Searching a body costs up to maxBody block reads; allow fewer searches per tick when bodies may be huge.
@@ -180,7 +184,7 @@ public final class WorldConversion implements ModInitializer {
             FluidState fluid = state.getFluidState();
             Liquid liquid = fluid.isEmpty() ? null : water && Liquid.WATER.matches(fluid) ? Liquid.WATER : lava && Liquid.LAVA.matches(fluid) ? Liquid.LAVA : null;
             if (liquid != null && !(state.getBlock() instanceof RealisticWaterBlock)) {
-               if (skipped.get(ChunkPos.pack(pos)) > now) {
+               if (skipped.get(pos.asLong()) > now) {
                   continue;
                }
 
@@ -213,7 +217,7 @@ public final class WorldConversion implements ModInitializer {
 
    /**
     * Finds the connected body of {@code liquid} containing {@code start} and converts all of it, or remembers its
-    * chunks as "not now" if it is too big, not fully loaded, or more than the tokens available.
+    * blocks as "not now" if it is too big, not fully loaded, or more than the tokens available.
     */
    private static void convertBody(ServerLevel level, BlockPos start, Liquid liquid, int maxBody, Long2LongOpenHashMap skipped, long now) {
       LongOpenHashSet body = new LongOpenHashSet();
@@ -266,16 +270,12 @@ public final class WorldConversion implements ModInitializer {
             }
          }
 
-         // Every chunk the body touched, including the unexplored frontier, so the next scan doesn't search it again.
+         // Every block found so far. Per block, not per chunk: an ocean must not block a pond next to it.
+         // Scanning finds the ocean again from blocks not yet found, but each search adds up to maxBody more blocks,
+         // so a few searches cover everything within the radius.
          long until = now + wait;
-         LongOpenHashSet chunks = new LongOpenHashSet();
          for (long key : body) {
-            p.set(key);
-            chunks.add(ChunkPos.pack(p));
-         }
-
-         for (long c : chunks) {
-            skipped.put(c, until);
+            skipped.put(key, until);
          }
 
          return;

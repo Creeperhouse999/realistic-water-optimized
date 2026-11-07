@@ -202,13 +202,23 @@ public final class PerfTests {
    private static void overdueReductions() {
       long t = 1_000_000;
       long late = t + SafeResolution.MAX_WAIT_MS;
-      check(SafeResolution.overdueReduction("resolution", "1", "2", t, late), "lowering resolution is applied after the wait");
-      check(!SafeResolution.overdueReduction("resolution", "1", "2", t, late - 1), "lowering resolution waits first");
-      check(!SafeResolution.overdueReduction("resolution", "3", "2", t, late * 10), "raising resolution always waits for calm water");
-      check(!SafeResolution.overdueReduction("resolution", "2", "2", t, late * 10), "same value is not forced");
-      check(!SafeResolution.overdueReduction("whitewater", "false", "true", t, late * 10), "only rebuild settings are queued");
-      check(!SafeResolution.overdueReduction("sandResolution", "x", "4", t, late * 10), "garbage value is not forced");
-      check(SafeResolution.overdueReduction("leafResolution", "4", "6", t, late), "leaf resolution reduction is applied after the wait");
+      long raiseLate = t + SafeResolution.MAX_RAISE_WAIT_MS;
+      check(SafeResolution.overdue("resolution", "1", "2", t, late), "lowering resolution is applied after the wait");
+      check(!SafeResolution.overdue("resolution", "1", "2", t, late - 1), "lowering resolution waits first");
+      check(!SafeResolution.overdue("resolution", "3", "2", t, late), "raising waits longer than lowering");
+      check(SafeResolution.overdue("resolution", "3", "2", t, raiseLate), "raising is applied after the long wait (springs)");
+      check(!SafeResolution.overdue("resolution", "2", "2", t, raiseLate * 10), "same value is not forced");
+      check(!SafeResolution.overdue("whitewater", "false", "true", t, raiseLate * 10), "only rebuild settings are queued");
+      check(!SafeResolution.overdue("sandResolution", "x", "4", t, raiseLate * 10), "garbage value is not forced");
+      check(SafeResolution.overdue("leafResolution", "4", "6", t, late), "leaf resolution reduction is applied after the wait");
+
+      equal("2", WaterCap.cap("resolution", "4", "2"), "Auto FPS never raises water resolution above the player's");
+      equal("1", WaterCap.cap("resolution", "1", "2"), "Auto FPS can still lower it");
+      equal("false", WaterCap.cap("whitewater", "true", "false"), "no foam if the player has foam off");
+      equal("true", WaterCap.cap("whitewater", "true", "true"), "foam allowed if the player has it on");
+      equal("false", WaterCap.cap("whitewater", "false", "true"), "Auto FPS can still switch foam off");
+      equal("4", WaterCap.cap("resolution", "4", null), "no baseline: level value");
+      equal("4", WaterCap.cap("resolution", "4", "x"), "unreadable own value: level value");
    }
 
    private static void baselineRoundTrip() {

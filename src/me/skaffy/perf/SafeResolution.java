@@ -13,13 +13,15 @@ import me.skaffy.client.water.WaterWorld;
  *
  * Springs (converted waterfalls, infinite sources) keep water moving forever. So a change that LOWERS a resolution
  * is applied anyway after {@link #MAX_WAIT_MS}: when the frame rate is too low, losing some moving water is better
- * than staying slow. Raising quality always waits for calm water.
+ * than staying slow. Raising is applied anyway after {@link #MAX_RAISE_WAIT_MS}, so water detail comes back near a
+ * spring (Auto FPS never raises above the player's own setting, see WaterCap).
  */
 public final class SafeResolution {
    /** Settings whose change triggers a full rebuild in WaterWorld.tick. */
    static final java.util.Set<String> REBUILDING = java.util.Set.of("resolution", "lavaResolution", "slimeResolution", "sandResolution", "leafResolution");
 
    static final long MAX_WAIT_MS = 45_000;
+   static final long MAX_RAISE_WAIT_MS = 180_000;
 
    private static final Map<String, String> pending = new LinkedHashMap<>();
    private static final Map<String, Long> queuedAt = new java.util.HashMap<>();
@@ -81,7 +83,7 @@ public final class SafeResolution {
       boolean changed = false;
       for (Map.Entry<String, String> e : java.util.List.copyOf(pending.entrySet())) {
          String name = e.getKey();
-         if (calm || overdueReduction(name, e.getValue(), WaterPresets.get(name), queuedAt.getOrDefault(name, now), now)) {
+         if (calm || overdue(name, e.getValue(), WaterPresets.get(name), queuedAt.getOrDefault(name, now), now)) {
             cancel(name);
             WaterPresets.setRaw(name, e.getValue());
             changed = true;
@@ -93,13 +95,18 @@ public final class SafeResolution {
       }
    }
 
-   /** A queued change that lowers a resolution and has waited longer than {@link #MAX_WAIT_MS}. */
-   static boolean overdueReduction(String name, String queued, String current, long since, long now) {
-      if (!rebuilds(name) || now - since < MAX_WAIT_MS) {
+   /** A queued change that has waited long enough to be applied while water still moves. */
+   static boolean overdue(String name, String queued, String current, long since, long now) {
+      if (!rebuilds(name)) {
          return false;
       }
 
-      return isReduction(queued, current);
+      long waited = now - since;
+      if (isReduction(queued, current)) {
+         return waited >= MAX_WAIT_MS;
+      }
+
+      return isReduction(current, queued) && waited >= MAX_RAISE_WAIT_MS;
    }
 
    static boolean isReduction(String queued, String current) {

@@ -298,10 +298,12 @@ public final class AutoFps {
          water.put("maxStepsPerFrame", String.valueOf(l.waterSteps()));
          water.put("whitewater", String.valueOf(l.whitewater()));
          for (Map.Entry<String, String> e : water.entrySet()) {
-            if (!e.getValue().equals(SafeResolution.effective(e.getKey()))) {
+            String own = baseline != null ? baseline.water().get(e.getKey()) : null;
+            String value = WaterCap.cap(e.getKey(), e.getValue(), own);
+            if (!value.equals(SafeResolution.effective(e.getKey()))) {
                // Resolution changes rebuild the simulation and would make flowing water vanish; SafeResolution
                // waits until the water is calm.
-               SafeResolution.set(e.getKey(), e.getValue());
+               SafeResolution.set(e.getKey(), value);
             }
          }
       }
