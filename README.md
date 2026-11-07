@@ -56,13 +56,19 @@ Game rules under **Create World → More → Game Rules → Realistic Water**, i
 
 | Game rule | Default | |
 |---|---|---|
-| `realistic-water:convert_water` | false | Oceans, lakes, rivers, waterfalls near players become realistic water |
-| `realistic-water:convert_lava` | false | Lava near players becomes realistic lava |
+| `realistic-water:convert_water` | false | Lakes, ponds and waterfalls near players become realistic water |
+| `realistic-water:convert_lava` | false | Lava pools and lava falls near players become realistic lava |
 | `realistic-water:convert_sand` | false | Sand with nothing solid under it becomes realistic sand |
-| `realistic-water:convert_radius` | 12 | Blocks around each player (4–48) |
-| `realistic-water:convert_per_second` | 200 | Conversion speed limit |
+| `realistic-water:convert_radius` | 12 | How far around each player to look (4–48) |
+| `realistic-water:convert_per_second` | 200 | Average blocks converted per second |
+| `realistic-water:convert_max_body` | 4096 | Biggest water or lava body converted (64–16384) |
 
-Only blocks near players are converted, a limited number per second, so an ocean never turns into one giant simulation at once. Pair it with the **Ocean** preset. Converted blocks stay converted.
+How it works:
+- Each lake is converted **whole, in one tick**. If only part of a lake were converted, the realistic part would drain into the vanilla part (the ocean sink below absorbs it).
+- Bodies bigger than `convert_max_body`, or reaching into unloaded chunks, stay vanilla. That includes oceans and most rivers.
+- Sources that feed a fall, like the top of a waterfall, become springs, so the fall keeps running. Flowing vanilla water is removed.
+- Kelp, seagrass and bubble columns turn into water. Waterlogged blocks are drained.
+- Converted blocks stay converted. Pair it with the **Ocean** preset.
 
 ### Performance changes under the hood
 - **Ocean sink:** realistic fluid that reaches vanilla water is absorbed instead of spreading the simulation box across the sea floor. Lava still turns water into cobblestone.

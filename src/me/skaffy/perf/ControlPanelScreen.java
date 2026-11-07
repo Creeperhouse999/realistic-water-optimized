@@ -248,7 +248,7 @@ public class ControlPanelScreen extends OptionsSubScreen {
 
    private void world() {
       this.heading("Realistic world");
-      this.note("Turns vanilla water, lava and falling sand near players into realistic ones, a few hundred blocks a second.");
+      this.note("Turns vanilla lakes, ponds, waterfalls, lava pools and falling sand near players into realistic ones. Each lake is converted whole.");
       IntegratedServer server = this.minecraft.getSingleplayerServer();
       if (server == null || server.overworld() == null) {
          this.note("Only in singleplayer from here. On a server use /gamerule realistic-water:convert_water true.");
@@ -256,19 +256,21 @@ public class ControlPanelScreen extends OptionsSubScreen {
          return;
       }
 
-      this.list.addSmall(this.ruleToggle(server, "Water", WorldConversion.CONVERT_WATER, "Water source blocks (oceans, lakes, rivers, tops of waterfalls) become realistic water."),
-         this.ruleToggle(server, "Lava", WorldConversion.CONVERT_LAVA, "Lava lakes and lava falls become realistic lava."));
+      this.list.addSmall(this.ruleToggle(server, "Water", WorldConversion.CONVERT_WATER, "Lakes, ponds and waterfalls become realistic water, one whole body at a time. Bodies bigger than Max body (oceans, big rivers) stay vanilla: half an ocean would drain into the other half."),
+         this.ruleToggle(server, "Lava", WorldConversion.CONVERT_LAVA, "Lava pools and lava falls become realistic lava, one whole body at a time."));
       this.list.addSmall(this.ruleToggle(server, "Falling sand", WorldConversion.CONVERT_SAND, "Sand with nothing solid under it becomes realistic sand."),
-         new RuleSlider(server, "Radius", WorldConversion.RADIUS, 4, 48, "Blocks around each player that get converted. Bigger = much heavier."));
-      this.list.addSmall(new RuleSlider(server, "Per second", WorldConversion.PER_SECOND, 10, 2000,
-            "How many blocks are converted each second. Lower spreads the work out."),
-         Button.builder(Component.literal("Ocean preset"), b -> {
+         new RuleSlider(server, "Radius", WorldConversion.RADIUS, 4, 48, 1, "How far around each player lakes and sand are looked for. A lake that reaches into the radius is converted whole."));
+      this.list.addSmall(new RuleSlider(server, "Per second", WorldConversion.PER_SECOND, 10, 2000, 10,
+            "Average blocks converted per second. A lake waits until enough has built up, then converts at once."),
+         new RuleSlider(server, "Max body", WorldConversion.MAX_BODY, 256, 16384, 256,
+            "Biggest lake (in blocks) that is converted at once. Bigger bodies stay vanilla. Bigger = heavier simulations and a longer hitch when it converts."));
+      this.list.addBig(Button.builder(Component.literal("Ocean preset"), b -> {
                WaterPresets.apply(WaterPresets.Preset.OCEAN);
                this.switchTo(Tab.WORLD, this.category);
             })
             .tooltip(Tooltip.create(Component.literal("Switches to the Ocean water preset, made for huge converted water bodies.")))
             .build());
-      this.note("Heavy! Start with a small radius. Converted blocks stay converted. Saved with the world.");
+      this.note("Heavy! Start small. Converted blocks stay converted; the rules are saved with the world.");
    }
 
    private void settings(java.util.Map<String, List<String>> groups) {
@@ -488,19 +490,23 @@ public class ControlPanelScreen extends OptionsSubScreen {
       private final int min;
       private final int max;
 
-      RuleSlider(IntegratedServer server, String label, GameRule<Integer> rule, int min, int max, String tooltip) {
+      private final int step;
+
+      RuleSlider(IntegratedServer server, String label, GameRule<Integer> rule, int min, int max, int step, String tooltip) {
          super(0, 0, 150, 20, Component.empty(), (Math.clamp(server.overworld().getGameRules().get(rule), min, max) - min) / (double)(max - min));
          this.server = server;
          this.label = label;
          this.rule = rule;
          this.min = min;
          this.max = max;
+         this.step = step;
          this.setTooltip(Tooltip.create(Component.literal(tooltip)));
          this.updateMessage();
       }
 
       private int picked() {
-         return (int)Math.round(this.min + this.value * (this.max - this.min));
+         int v = (int)Math.round(this.min + this.value * (this.max - this.min));
+         return Math.clamp((long)Math.round(v / (double)this.step) * this.step, this.min, this.max);
       }
 
       @Override

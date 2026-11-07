@@ -25,6 +25,7 @@ public final class PerfTests {
       presets();
       panelLayout();
       patchedDefaults();
+      overdueReductions();
 
       System.out.println(checks + " checks, " + failures.size() + " failed");
       for (String f : failures) {
@@ -183,5 +184,17 @@ public final class PerfTests {
             validValue("default", name, def);
          }
       }
+   }
+
+   private static void overdueReductions() {
+      long t = 1_000_000;
+      long late = t + SafeResolution.MAX_WAIT_MS;
+      check(SafeResolution.overdueReduction("resolution", "1", "2", t, late), "lowering resolution is applied after the wait");
+      check(!SafeResolution.overdueReduction("resolution", "1", "2", t, late - 1), "lowering resolution waits first");
+      check(!SafeResolution.overdueReduction("resolution", "3", "2", t, late * 10), "raising resolution always waits for calm water");
+      check(!SafeResolution.overdueReduction("resolution", "2", "2", t, late * 10), "same value is not forced");
+      check(!SafeResolution.overdueReduction("whitewater", "false", "true", t, late * 10), "only rebuild settings are queued");
+      check(!SafeResolution.overdueReduction("sandResolution", "x", "4", t, late * 10), "garbage value is not forced");
+      check(SafeResolution.overdueReduction("leafResolution", "4", "6", t, late), "leaf resolution reduction is applied after the wait");
    }
 }

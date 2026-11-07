@@ -9,7 +9,7 @@ import me.skaffy.client.water.WaterSettings;
 public final class WaterPresets {
    public enum Preset {
       LOWEST("Lowest", "Blocky water at 1 cell per block. Use when nothing else helps."),
-      OCEAN("Ocean", "For huge bodies of water: oceans, lakes and converted worlds. Very cheap simulation, smooth surface, strong ripples."),
+      OCEAN("Ocean", "For big bodies of water: converted lakes and big floods. Very cheap simulation, smooth surface, strong ripples."),
       TSUNAMI("Tsunami", "Default. Smooth big floods and waves, no foam particles."),
       BALANCED("Balanced", "Finer water with foam and spray. Medium cost."),
       QUALITY("Quality", "Close to the original mod's look: fine water, full foam. Heavy: keep floods small.");
