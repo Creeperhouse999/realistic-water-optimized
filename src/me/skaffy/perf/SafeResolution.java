@@ -2,8 +2,6 @@ package me.skaffy.perf;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import me.skaffy.client.water.WaterWorld;
 
 /**
@@ -17,7 +15,6 @@ public final class SafeResolution {
    /** Settings whose change triggers a full rebuild in WaterWorld.tick. */
    static final java.util.Set<String> REBUILDING = java.util.Set.of("resolution", "lavaResolution", "slimeResolution", "sandResolution", "leafResolution");
 
-   private static final Pattern NUMBER = Pattern.compile("(?:fluid|particles|leaves) (\\S+)");
    private static final Map<String, String> pending = new LinkedHashMap<>();
    private static long lastCheck;
    private static boolean lastIdle = true;
@@ -99,19 +96,6 @@ public final class SafeResolution {
          return -1;
       }
 
-      long total = 0;
-      Matcher m = NUMBER.matcher(line);
-      while (m.find()) {
-         try {
-            // statsLine formats with the default locale: 1,234 / 1.234 / 1 234. Keep only the digits.
-            String digits = m.group(1).replaceAll("[^0-9]", "");
-            if (!digits.isEmpty()) {
-               total += Long.parseLong(digits);
-            }
-         } catch (NumberFormatException ignored) {
-         }
-      }
-
-      return total;
+      return WaterStats.simulated(line);
    }
 }

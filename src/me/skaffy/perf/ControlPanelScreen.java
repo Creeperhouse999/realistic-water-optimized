@@ -124,19 +124,8 @@ public class ControlPanelScreen extends OptionsSubScreen {
          case HOME -> this.home();
          case AUTO -> this.autoFps();
          case WORLD -> this.world();
-         case WATER -> this.settings(List.<Object>of(
-            "Simulation", List.of("resolution", "maxStepsPerFrame", "maxSpeed", "flipRatio", "fluidRestSpeed", "fluidRestTime"),
-            "Surface and look", List.of("surfaceSubdivision", "dropletThreshold", "detailStrength", "detailScale", "refraction", "roughness", "specular", "underwaterFog"),
-            "Foam", List.of("whitewater", "foamCoverage", "foamSize"),
-            "Behaviour", List.of("sourceFill", "bucketMakesSource", "flowSounds", "flowSoundVolume")
-         ));
-         case MATERIALS -> this.settings(List.<Object>of(
-            "Lava", List.of("lavaResolution", "lavaIgniteFlammables", "lavaWaterMixing", "lavaFlowSounds"),
-            "Slime", List.of("slimeResolution", "slimeViscosity", "slimeAdhesion", "slimeSounds"),
-            "Sand", List.of("sandResolution", "sandMaxStepsPerFrame", "sandGrainsPerParticle", "sandGrainSize", "sandFrictionAngle", "sandSounds"),
-            "Leaves", List.of("leafResolution", "leavesPerBlock", "leafWindStrength", "leafSounds"),
-            "Water pump", List.of("waveMakerRate", "waveMakerSpeed")
-         ));
+         case WATER -> this.settings(PanelLayout.WATER);
+         case MATERIALS -> this.settings(PanelLayout.MATERIALS);
          case ALL -> this.all();
       }
    }
@@ -199,7 +188,7 @@ public class ControlPanelScreen extends OptionsSubScreen {
 
       this.list.addSmall(this.options.renderDistance(), this.options.simulationDistance());
       this.list.addSmall(this.options.framerateLimit(), this.options.enableVsync());
-      this.list.addSmall(this.setting("resolution"), this.setting("whitewater"));
+      this.list.addSmall(this.setting(PanelLayout.HOME_QUICK.get(0)), this.setting(PanelLayout.HOME_QUICK.get(1)));
 
       this.heading("Auto FPS");
       CycleButton<Boolean> auto = CycleButton.onOffBuilder(PanelConfig.autoFps)
@@ -282,13 +271,11 @@ public class ControlPanelScreen extends OptionsSubScreen {
       this.note("Heavy! Start with a small radius. Converted blocks stay converted. Saved with the world.");
    }
 
-   private void settings(List<Object> groups) {
-      for (int i = 0; i + 1 < groups.size(); i += 2) {
-         this.heading((String)groups.get(i));
+   private void settings(java.util.Map<String, List<String>> groups) {
+      for (java.util.Map.Entry<String, List<String>> group : groups.entrySet()) {
+         this.heading(group.getKey());
          List<AbstractWidget> widgets = new ArrayList<>();
-         @SuppressWarnings("unchecked")
-         List<String> names = (List<String>)groups.get(i + 1);
-         for (String name : names) {
+         for (String name : group.getValue()) {
             AbstractWidget w = this.setting(name);
             if (w != null) {
                widgets.add(w);
@@ -379,7 +366,6 @@ public class ControlPanelScreen extends OptionsSubScreen {
    }
 
    private Component waterStatusText() {
-      long simulated = SafeResolution.countSimulated();
       String s;
       try {
          s = WaterWorld.get().statsLine();
@@ -387,11 +373,10 @@ public class ControlPanelScreen extends OptionsSubScreen {
          return Component.literal("No water data").withStyle(ChatFormatting.GRAY);
       }
 
-      int cut = s.indexOf("frame ");
-      String frame = "";
-      if (cut >= 0) {
-         int end = s.indexOf(" ms", cut);
-         frame = end > 0 ? "  |  " + s.substring(cut, end + 3) : "";
+      long simulated = WaterStats.simulated(s);
+      String frame = WaterStats.frameTime(s);
+      if (!frame.isEmpty()) {
+         frame = "  |  " + frame;
       }
 
       if (simulated < 0) {

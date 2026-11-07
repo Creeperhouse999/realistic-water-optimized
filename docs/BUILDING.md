@@ -36,6 +36,18 @@ sh tools/build.sh
 ```
 Produces `realistic-water-1.3-lowend.jar`, `-balanced.jar` and `-tsunami.jar` in the project root.
 
+## Offline tests
+```sh
+sh tools/test.sh               # checks build-tsunami
+sh tools/test.sh build-lowend  # or another preset folder
+```
+No game or GPU needed. Checks `tools/test/PerfTests.java`:
+- stats-line parsing in several locales
+- memory guard limits
+- every preset value is a real setting within its range, and all presets set the same settings
+- every setting named in the panel and Sodium page exists
+- the bytecode-patched defaults are valid values
+
 ## What the build does
 | Step | File |
 |---|---|

@@ -43,7 +43,7 @@ public final class SodiumOptions implements ConfigEntryPoint {
       // The fork's control panel replaces the original 19 pages of raw options; Sodium keeps only the headline
       // settings, everything else is one click away in the panel.
       OptionGroupBuilder quick = builder.createOptionGroup().setName(Component.literal("Quick settings"));
-      for (String name : new String[]{"resolution", "maxStepsPerFrame", "surfaceSubdivision", "whitewater", "lavaResolution", "sandResolution", "leafResolution"}) {
+      for (String name : me.skaffy.perf.PanelLayout.SODIUM_QUICK) {
          WaterSettingsInfo.Info info = WaterSettingsInfo.get(name);
          OptionBuilder option = info == null ? null : option(builder, info, ids);
          if (option != null) {

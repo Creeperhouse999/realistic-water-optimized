@@ -8,6 +8,7 @@ All versions are forks of Realistic Water **1.3** by Skaffy for Minecraft 26.3.
 - **Ocean** preset for huge water bodies.
 - Realistic world game rules (`realistic-water:convert_water`, `convert_lava`, `convert_sand`, `convert_radius`, `convert_per_second`), visible in Create World → Game Rules and in the panel's World tab.
 - GPU memory guard: very large floods lower surface detail for that region instead of failing to allocate GPU memory.
+- Offline tests (`sh tools/test.sh`): presets, panel setting names, patched defaults, stats parsing, memory guard.
 
 ### Fixed
 - Water vanished while Auto FPS changed quality: water detail now only changes while no water is moving.
