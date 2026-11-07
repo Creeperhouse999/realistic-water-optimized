@@ -72,20 +72,32 @@ public final class PerfTests {
    }
 
    private static void memoryGuard() {
-      equal(2, MemoryGuard.subdivision(40, 30, 40, 2), "small region keeps its subdivision");
-      equal(8, MemoryGuard.subdivision(4, 4, 4, 12), "subdivision is capped at 8");
-      equal(1, MemoryGuard.subdivision(4, 4, 4, 0), "subdivision is at least 1");
-      equal(1, MemoryGuard.subdivision(400, 200, 400, 2), "huge region drops to 1");
-      equal(2, MemoryGuard.subdivision(200, 100, 200, 4), "4M cells at 4 drops to 2");
+      long max = MemoryGuard.MAX_FINE_CELLS;
+      equal(2, MemoryGuard.subdivision(40, 30, 40, 2, max), "small region keeps its subdivision");
+      equal(8, MemoryGuard.subdivision(4, 4, 4, 12, max), "subdivision is capped at 8");
+      equal(1, MemoryGuard.subdivision(4, 4, 4, 0, max), "subdivision is at least 1");
+      equal(1, MemoryGuard.subdivision(400, 200, 400, 2, max), "huge region drops to 1");
+      equal(2, MemoryGuard.subdivision(200, 100, 200, 4, max), "4M cells at 4 drops to 2");
+
+      // VRAM scaling: 1/14 of the card for the three buffers, between 96 MB and 576 MB.
+      long gb = 1L << 30;
+      equal(max, MemoryGuard.limitFor(0), "unknown VRAM keeps the full limit");
+      equal(max, MemoryGuard.limitFor(8 * gb), "8 GB card keeps the full limit");
+      equal(max, MemoryGuard.limitFor(24 * gb), "limit never grows past 576 MB");
+      check(MemoryGuard.limitFor(4 * gb) < max && MemoryGuard.limitFor(4 * gb) * 12 <= 4 * gb / 14, "4 GB card gets a smaller limit");
+      equal(MemoryGuard.MIN_FINE_CELLS, MemoryGuard.limitFor(256L << 20), "tiny heap gets the minimum");
+      check(MemoryGuard.limitFor(4 * gb) < MemoryGuard.limitFor(6 * gb), "limit grows with VRAM");
 
       // The 1.2 GB failure: three buffers must stay under the cap for any region the mod can make.
       int[][] regions = {{512, 256, 512}, {300, 120, 300}, {96, 64, 96}, {1, 1, 1}};
-      for (int[] r : regions) {
-         for (int req = 1; req <= 8; req++) {
-            int s = MemoryGuard.subdivision(r[0], r[1], r[2], req);
-            long fine = (long)r[0] * r[1] * r[2] * s * s * s;
-            check(s >= 1 && s <= req, "subdivision in [1, requested] for " + r[0] + "x" + r[1] + "x" + r[2] + " req " + req + ": " + s);
-            check(s == 1 || fine <= MemoryGuard.MAX_FINE_CELLS, "fine grid fits for " + r[0] + "x" + r[1] + "x" + r[2] + " req " + req);
+      for (long cap : new long[]{max, MemoryGuard.limitFor(4 * gb), MemoryGuard.MIN_FINE_CELLS}) {
+         for (int[] r : regions) {
+            for (int req = 1; req <= 8; req++) {
+               int s = MemoryGuard.subdivision(r[0], r[1], r[2], req, cap);
+               long fine = (long)r[0] * r[1] * r[2] * s * s * s;
+               check(s >= 1 && s <= req, "subdivision in [1, requested] for " + r[0] + "x" + r[1] + "x" + r[2] + " req " + req + ": " + s);
+               check(s == 1 || fine <= cap, "fine grid fits for " + r[0] + "x" + r[1] + "x" + r[2] + " req " + req + " cap " + cap);
+            }
          }
       }
    }

@@ -73,7 +73,7 @@ How it works:
 ### Performance changes under the hood
 - **Ocean sink:** realistic fluid that reaches vanilla water is absorbed instead of spreading the simulation box across the sea floor. Lava still turns water into cobblestone.
 - **Half-resolution fluid passes above 1440p:** 4K keeps full detail on screen, only the water's internal images are half size.
-- **GPU memory guard:** huge floods lower the surface mesh detail for that region instead of failing a 1.2 GB allocation and switching the simulation off.
+- **GPU memory guard:** huge floods lower the surface mesh detail for that region instead of failing a 1.2 GB allocation and switching the simulation off. The limit scales with your card's video memory.
 - **Cheaper defaults:** water resolution 2, at most 2 physics steps per frame, no foam, lighter reflections (20 SSR steps instead of 48) and shadows (24 instead of 64), lighter sand, leaves, steam, lava and slime.
 
 ---
