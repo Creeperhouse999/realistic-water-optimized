@@ -1,0 +1,45 @@
+name: Publish release to Modrinth
+
+# The jar can't be built on GitHub (the build patches the original mod's jar, which isn't in this repo), so this
+# uploads the jar attached to the GitHub release. Needs the MODRINTH_TOKEN secret and MODRINTH_PROJECT_ID variable.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to publish (e.g. v1.3-perf.2)
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download the release jar
+        run: |
+          mkdir dist
+          gh release download "$TAG" -R "$GITHUB_REPOSITORY" -p "realistic-water-optimized-*.jar" -D dist
+          ls -l dist
+
+      - name: Publish to Modrinth
+        if: env.MODRINTH_TOKEN != '' && vars.MODRINTH_PROJECT_ID != ''
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: ${{ vars.MODRINTH_PROJECT_ID }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          files: dist/realistic-water-optimized-*.jar
+          name: Realistic Water - OPTIMIZED ${{ env.TAG }}
+          version: ${{ env.TAG }}
+          version-type: beta
+          changelog-file: docs/releases/${{ env.TAG }}.md
+          loaders: fabric
+          game-versions: 26.3
+          dependencies: |
+            fabric-api(required){modrinth:P7dR8mSH}
+            sodium(optional){modrinth:AANobbMI}

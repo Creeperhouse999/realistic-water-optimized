@@ -11,9 +11,10 @@ Auto FPS that keeps your frame rate, and an option to turn the lakes of your wor
 [![Requires Fabric API](https://img.shields.io/badge/Requires-Fabric%20API-3B3B3B?style=flat-square)](https://modrinth.com/mod/fabric-api)
 [![Based on Realistic Water 1.3](https://img.shields.io/badge/Based%20on-Realistic%20Water%201.3-2E86C1?style=flat-square)](https://github.com/sskaffy/Realistic-Water)
 [![Release 1.3-perf.2](https://img.shields.io/badge/Release-1.3--perf.2-5865F2?style=flat-square)](../../releases)
+[![Modrinth](https://img.shields.io/badge/Modrinth-Realistic%20Water%20OPTIMIZED-1BD96A?style=flat-square&logo=modrinth&logoColor=white)](https://modrinth.com/mod/realistic-water-optimized)
 [![Made with Claude](https://img.shields.io/badge/Made%20with-Claude-D97757?style=flat-square)](https://claude.com/claude-code)
 
-[Download](../../releases) ·
+[Download](https://modrinth.com/mod/realistic-water-optimized) ·
 [Install](#install) ·
 [How to use](#how-to-use) ·
 [Roadmap](#roadmap) ·
@@ -154,7 +155,8 @@ All FPS numbers in this README are from this machine. Results on other hardware 
 1. Install [Fabric Loader](https://fabricmc.net/use/installer/) for Minecraft **26.3** (or create a Fabric
    26.3 profile in your launcher, e.g. Modrinth App or Prism).
 2. Download [Fabric API](https://modrinth.com/mod/fabric-api) for 26.3.
-3. Download `realistic-water-optimized-1.3-perf.2.jar` from [Releases](../../releases).
+3. Download `realistic-water-optimized-x.y.jar` from [Modrinth](https://modrinth.com/mod/realistic-water-optimized)
+   or [GitHub Releases](../../releases).
 4. Put both in your `mods` folder. **Remove the original Realistic Water jar** if you had it.
 5. Start the game, join a world and press **K**.
 
@@ -163,7 +165,7 @@ Your `mods` folder should look like this:
 ```
 mods/
 ├── fabric-api-x.y.z+26.3.jar
-├── realistic-water-optimized-1.3-perf.2.jar
+├── realistic-water-optimized-x.y.jar
 └── sodium-fabric-x.y.z+mc26.3.jar   (optional)
 ```
 

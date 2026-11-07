@@ -1,0 +1,1 @@
+Skaffy's Realistic Water, made playable: big floods at 60 FPS on a gaming laptop, a control panel with presets, Auto FPS, and optional realistic lakes in your world. Unofficial fork.

@@ -1,0 +1,54 @@
+name: Sync Modrinth page
+
+# Pushes the project page text, links, tags and icon from .github/modrinth/ to Modrinth.
+# Needs the MODRINTH_TOKEN secret and the MODRINTH_PROJECT_ID variable; skipped while either is missing.
+on:
+  push:
+    branches: [main]
+    paths: [".github/modrinth/**", ".github/workflows/modrinth-page.yml"]
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+      PROJECT: ${{ vars.MODRINTH_PROJECT_ID }}
+      UA: Creeperhouse999/realistic-water-optimized (github-actions)
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update page
+        if: env.MODRINTH_TOKEN != '' && env.PROJECT != ''
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          body = {
+              "title": "Realistic Water - OPTIMIZED",
+              "description": open(".github/modrinth/summary.txt", encoding="utf-8").read().strip(),
+              "body": open(".github/modrinth/description.md", encoding="utf-8").read(),
+              "categories": ["optimization", "game-mechanics", "utility"],
+              "client_side": "required",
+              "server_side": "required",
+              "source_url": "https://github.com/Creeperhouse999/realistic-water-optimized",
+              "issues_url": "https://github.com/Creeperhouse999/realistic-water-optimized/issues",
+              "license_url": "https://github.com/Creeperhouse999/realistic-water-optimized/blob/main/LICENSE",
+          }
+          req = urllib.request.Request(
+              f"https://api.modrinth.com/v2/project/{os.environ['PROJECT']}",
+              data=json.dumps(body).encode(), method="PATCH",
+              headers={"Authorization": os.environ["MODRINTH_TOKEN"], "Content-Type": "application/json",
+                       "User-Agent": os.environ["UA"]})
+          with urllib.request.urlopen(req) as r:
+              print("page updated:", r.status)
+          PY
+
+      - name: Update icon
+        if: env.MODRINTH_TOKEN != '' && env.PROJECT != ''
+        run: |
+          code=$(curl -s -o /tmp/out.txt -w '%{http_code}' -X PATCH \
+            "https://api.modrinth.com/v2/project/$PROJECT/icon?ext=png" \
+            -H "Authorization: $MODRINTH_TOKEN" -H "User-Agent: $UA" -H "Content-Type: image/png" \
+            --data-binary @.github/modrinth/icon.png)
+          cat /tmp/out.txt; echo; echo "icon: HTTP $code"
+          [ "$code" -lt 300 ]
