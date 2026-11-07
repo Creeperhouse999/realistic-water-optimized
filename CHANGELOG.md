@@ -17,6 +17,7 @@ All versions are forks of Realistic Water **1.3** by Skaffy for Minecraft 26.3.
 ### Changed
 - Sand looks fuller at the same cost: 16 grains drawn per particle (was 8), slightly bigger grains, smoother pile surface.
 - Shorter panel button labels.
+- The Sodium page shows the panel buttons and 7 headline settings instead of 19 pages of raw options.
 
 ## 1.3-perf.1
 ### Added

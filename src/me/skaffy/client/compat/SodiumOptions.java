@@ -40,25 +40,19 @@ public final class SodiumOptions implements ConfigEntryPoint {
             .setTooltip(Component.literal("Opens the control panel on the All settings tab: every setting of the mod by category."))
             .setScreenConsumer(screen -> Minecraft.getInstance().gui.setScreen(new me.skaffy.perf.ControlPanelScreen(screen, me.skaffy.perf.ControlPanelScreen.Tab.ALL, "")))
       );
-      mod.addPage(first);
-
-      for (String category : WaterSettingsInfo.categories()) {
-         OptionGroupBuilder group = builder.createOptionGroup().setName(Component.literal(category));
-         int added = 0;
-
-         for (String name : WaterSettingsInfo.names(category)) {
-            WaterSettingsInfo.Info info = WaterSettingsInfo.get(name);
-            OptionBuilder option = info == null ? null : option(builder, info, ids);
-            if (option != null) {
-               group.addOption(option);
-               added++;
-            }
-         }
-
-         if (added > 0) {
-            mod.addPage(builder.createOptionPage().setName(Component.literal(category)).addOptionGroup(group));
+      // The fork's control panel replaces the original 19 pages of raw options; Sodium keeps only the headline
+      // settings, everything else is one click away in the panel.
+      OptionGroupBuilder quick = builder.createOptionGroup().setName(Component.literal("Quick settings"));
+      for (String name : new String[]{"resolution", "maxStepsPerFrame", "surfaceSubdivision", "whitewater", "lavaResolution", "sandResolution", "leafResolution"}) {
+         WaterSettingsInfo.Info info = WaterSettingsInfo.get(name);
+         OptionBuilder option = info == null ? null : option(builder, info, ids);
+         if (option != null) {
+            quick.addOption(option);
          }
       }
+
+      first.addOptionGroup(quick);
+      mod.addPage(first);
    }
 
    @Nullable
