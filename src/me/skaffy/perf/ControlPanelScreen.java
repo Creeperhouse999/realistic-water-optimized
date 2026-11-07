@@ -106,8 +106,19 @@ public class ControlPanelScreen extends OptionsSubScreen {
          s -> s.alignHorizontallyCenter()
       );
       LinearLayout tabs = column.addChild(LinearLayout.horizontal().spacing(3), s -> s.alignHorizontallyCenter());
-      for (Tab t : Tab.values()) {
-         int width = Math.max(44, this.font.width(t.label) + 14);
+      Tab[] all = Tab.values();
+      int[] widths = new int[all.length];
+      int total = 3 * (all.length - 1);
+      for (int i = 0; i < all.length; i++) {
+         widths[i] = Math.max(44, this.font.width(all[i].label) + 14);
+         total += widths[i];
+      }
+
+      // The scaled screen can be as narrow as 320 px (big GUI scale): shrink the tabs to fit instead of clipping.
+      int available = this.width - 8;
+      for (int i = 0; i < all.length; i++) {
+         Tab t = all[i];
+         int width = total > available ? Math.max(30, widths[i] * (available - 3 * (all.length - 1)) / (total - 3 * (all.length - 1))) : widths[i];
          Button b = Button.builder(Component.literal(t.label), button -> this.switchTo(t, this.category)).width(width).build();
          b.active = t != this.tab;
          tabs.addChild(b);
