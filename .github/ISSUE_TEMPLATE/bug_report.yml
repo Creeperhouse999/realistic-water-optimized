@@ -1,0 +1,51 @@
+name: Bug report
+description: Something broke, crashed or looks wrong
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! This is the **performance fork**. If the same problem happens with the
+        [original Realistic Water](https://github.com/sskaffy/Realistic-Water), please report it there too.
+  - type: input
+    id: version
+    attributes:
+      label: Fork version
+      description: Mod menu or the jar name, e.g. 1.3-perf.tsunami
+    validations:
+      required: true
+  - type: dropdown
+    id: preset
+    attributes:
+      label: Water preset
+      options: [Lowest, Ocean, Tsunami, Balanced, Quality, Custom / changed settings]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: stats
+    attributes:
+      label: /water stats output
+      description: Run `/water stats` while the problem happens and paste the line.
+      render: text
+  - type: input
+    id: gpu
+    attributes:
+      label: GPU, VRAM and resolution
+      placeholder: RTX 4070 Laptop 8 GB, 3840x2160
+  - type: textarea
+    id: mods
+    attributes:
+      label: Other mods
+      description: Especially Sodium, Iris or shader packs.
+  - type: textarea
+    id: log
+    attributes:
+      label: Log or crash report
+      description: Drag in `logs/latest.log` or the crash report.

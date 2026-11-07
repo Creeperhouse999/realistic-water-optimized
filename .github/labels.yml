@@ -1,0 +1,11 @@
+# Labels for the repository. Create them with tools/github_setup.sh (needs the gh CLI and a repo).
+- { name: bug,           color: d73a4a, description: Something is broken }
+- { name: performance,   color: fbca04, description: FPS, stutter or GPU memory }
+- { name: enhancement,   color: a2eeef, description: New feature or improvement }
+- { name: needs-triage,  color: ededed, description: Not looked at yet }
+- { name: auto-fps,      color: 5319e7, description: Auto FPS governor }
+- { name: control-panel, color: 1d76db, description: The tabbed panel }
+- { name: world-conversion, color: 0e8a16, description: Realistic world game rules }
+- { name: presets,       color: c5def5, description: Water presets and defaults }
+- { name: upstream,      color: 6f42c1, description: Also happens in the original mod }
+- { name: untested,      color: e99695, description: Written but not yet tested in game }

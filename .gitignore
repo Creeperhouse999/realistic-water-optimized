@@ -1,0 +1,33 @@
+# Original mod (not ours to redistribute unmodified) and generated files
+extracted/
+decompiled/
+build-*/
+*.jar
+!gradle/wrapper/*.jar
+
+# Build outputs
+tools/out/
+tools/perfout/
+tools/rendout/
+tools/sodout/
+tools/scout/
+tools/chk/
+tools/gp/
+tools/fapi/
+tools/decomp.log
+
+# Machine-specific classpaths (see tools/cp.txt.example)
+tools/cp.txt
+tools/cp_extra.txt
+tools/scp.txt
+
+# Local test helpers and screenshots
+tools/*.png
+tools/pc.ps1
+tools/launch.py
+
+.DS_Store
+Thumbs.db
+
+# Local agent state
+.claude/

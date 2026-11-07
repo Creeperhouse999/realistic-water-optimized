@@ -1,0 +1,32 @@
+name: Performance problem
+description: Low FPS, stutter or memory problems
+labels: ["performance", "needs-triage"]
+body:
+  - type: textarea
+    id: scene
+    attributes:
+      label: What were you doing?
+      description: e.g. "glass box with 25 springs, broke one wall, village flood"
+    validations:
+      required: true
+  - type: input
+    id: fps
+    attributes:
+      label: FPS before / during
+      placeholder: 60 → 12
+  - type: textarea
+    id: stats
+    attributes:
+      label: /water stats output during the lag
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: autofps
+    attributes:
+      label: Auto FPS
+      options: ["Off", "On"]
+  - type: input
+    id: hardware
+    attributes:
+      label: CPU, GPU, RAM, resolution
