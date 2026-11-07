@@ -27,11 +27,19 @@ jobs:
           gh release download "$TAG" -R "$GITHUB_REPOSITORY" -p "realistic-water-optimized-*.jar" -D dist
           ls -l dist
 
-      - name: Publish to Modrinth
+      - name: Resolve the Modrinth project ID
+        id: project
         if: env.MODRINTH_TOKEN != '' && vars.MODRINTH_PROJECT_ID != ''
+        run: |
+          id=$(curl -sf "https://api.modrinth.com/v2/project/${{ vars.MODRINTH_PROJECT_ID }}"             -H "Authorization: $MODRINTH_TOKEN" -H "User-Agent: Creeperhouse999/realistic-water-optimized (github-actions)"             | python3 -c "import json,sys; print(json.load(sys.stdin)['id'])")
+          echo "project id: $id"
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to Modrinth
+        if: steps.project.outputs.id != ''
         uses: Kir-Antipov/mc-publish@v3.3
         with:
-          modrinth-id: ${{ vars.MODRINTH_PROJECT_ID }}
+          modrinth-id: ${{ steps.project.outputs.id }}
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           files: dist/realistic-water-optimized-*.jar
           name: Realistic Water - OPTIMIZED ${{ env.TAG }}
