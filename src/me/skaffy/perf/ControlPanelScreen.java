@@ -194,7 +194,7 @@ public class ControlPanelScreen extends OptionsSubScreen {
 
       this.heading("Quick settings");
       if (PanelConfig.autoFps) {
-         this.note("Auto FPS is on: it changes view distance and water detail as you play. Water settings you pick are kept for when it is off.");
+         this.note("Auto FPS is on and changes these as you play. Water settings you pick come back when it is off.");
       }
 
       this.list.addSmall(this.options.renderDistance(), this.options.simulationDistance());
@@ -226,7 +226,7 @@ public class ControlPanelScreen extends OptionsSubScreen {
 
    private void autoFps() {
       this.heading("Auto FPS");
-      this.note("Keeps the game near your target FPS by changing render distance, clouds, particles and water quality in the background. Turning it off puts your own settings back.");
+      this.note("Holds your target FPS by changing view distance, clouds, particles and water detail. Off = your own settings back.");
       CycleButton<Boolean> auto = CycleButton.onOffBuilder(PanelConfig.autoFps)
          .create(Component.literal("Auto FPS"), (button, on) -> AutoFps.setEnabled(on));
       this.list.addSmall(auto, new TargetSlider());
@@ -263,12 +263,12 @@ public class ControlPanelScreen extends OptionsSubScreen {
             .withStyle(i == AutoFps.level() ? ChatFormatting.GREEN : ChatFormatting.GRAY));
       }
 
-      this.note("Water detail never goes above your own water settings. It changes only while no water is moving, so floods don't vanish mid-wave (near springs: lowering after 45 s, raising after 3 min).");
+      this.note("Water detail never goes above yours, and only changes when no realistic water is nearby (a change rebuilds all water).");
    }
 
    private void world() {
       this.heading("Realistic world");
-      this.note("Turns vanilla lakes, ponds, waterfalls, lava pools and falling sand near players into realistic ones. Each lake is converted whole.");
+      this.note("Turns vanilla lakes, waterfalls, lava pools and falling sand near players realistic. Each lake converts whole.");
       IntegratedServer server = this.minecraft.getSingleplayerServer();
       if (server == null || server.overworld() == null) {
          this.note("Only in singleplayer from here. On a server use /gamerule realistic-water:convert_water true.");
@@ -386,7 +386,7 @@ public class ControlPanelScreen extends OptionsSubScreen {
       }
 
       int target = AutoFps.effectiveTarget(this.options);
-      String waiting = SafeResolution.hasPending() ? "  (water detail waits for calm water)" : "";
+      String waiting = SafeResolution.hasPending() ? "  (water detail waits until no water is simulated)" : "";
       return Component.literal("Now: " + AutoFps.levelName() + " (" + (AutoFps.level() + 1) + "/" + AutoFps.LEVELS.length + ")  " + AutoFps.fps() + " / " + target
             + " FPS" + waiting)
          .withStyle(ChatFormatting.GREEN);

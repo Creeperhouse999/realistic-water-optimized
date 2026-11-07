@@ -13,6 +13,9 @@ public final class WaterStats {
    /** "fluid N" (water, lava fluid, slime fluid), "sand particles N", "leaves N". Not whitewater: spray settles by itself. */
    private static final Pattern MOVING = Pattern.compile("(?:fluid|particles|leaves) (\\S+)");
 
+   /** "3 water bodies", "1 lava bodies", "1 slime bodies", "2 sand bodies", "1 leaf piles". */
+   private static final Pattern BODIES = Pattern.compile("(\\S+) (?:water bodies|lava bodies|slime bodies|sand bodies|leaf piles)");
+
    private WaterStats() {
    }
 
@@ -34,6 +37,27 @@ public final class WaterStats {
             total += Long.parseLong(digits);
          } catch (NumberFormatException ignored) {
             // more than 19 digits: not a real count
+         }
+      }
+
+      return total;
+   }
+
+   /** Number of simulated bodies of any material (settled ones count too), 0 for an empty world, -1 if the line is missing. */
+   public static long bodies(String line) {
+      if (line == null) {
+         return -1;
+      }
+
+      long total = 0;
+      Matcher m = BODIES.matcher(line);
+      while (m.find()) {
+         String digits = m.group(1).replaceAll("[^0-9]", "");
+         if (!digits.isEmpty()) {
+            try {
+               total += Long.parseLong(digits);
+            } catch (NumberFormatException ignored) {
+            }
          }
       }
 

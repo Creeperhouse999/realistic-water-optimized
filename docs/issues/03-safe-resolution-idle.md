@@ -1,14 +1,11 @@
 ---
-title: "Auto FPS: water detail changes near springs and pumps"
-labels: [auto-fps, untested]
+title: "Resolution changes rebuild all water: floods vanish, full tanks burst"
+labels: [auto-fps, upstream]
 ---
-Auto FPS queues water-detail (resolution) changes until `/water stats` reports no moving fluid, sand or leaves, because a resolution change rebuilds every simulation and makes flowing water vanish. Settled water drops to `fluid 0`, but springs and running pumps never do.
+Changing a water resolution (`/water set resolution`, the panel, a preset, or Auto FPS) makes the mod throw away every simulation and rebuild it from blocks (`WaterWorld.reload`).
 
-Current behaviour:
-- lowering water detail is forced after 45 s (`SafeResolution.MAX_WAIT_MS`): a low frame rate is worse than losing some moving water
-- raising it back is forced after 3 min (`MAX_RAISE_WAIT_MS`)
-- Auto FPS never sets water detail above the player's own settings (`WaterCap`)
+Seen in game on 2026-11-07 (RTX 4070 laptop): a settled 19x13x17 glass tank of realistic water leaked through intact glass right after resolution 2 -> 1 and again after 1 -> 2. A freshly filled tank at the same settings did not leak, so it is the rebuild, not the resolution or CFL.
 
-Seen in game (2026-11-07): next to a converted waterfall the panel showed "water detail waits for calm water", as expected.
+Fix in the fork: Auto FPS now only changes water resolution when nothing is simulated at all (`SafeResolution`), and never forces it. Manual changes still rebuild.
 
-To check: does the forced change cause a visible pop next to a spring? Better long-term options: only count fluid near the camera, or migrate particles between resolutions instead of rebuilding.
+Still open (upstream behaviour): make the rebuild keep particles (resample them to the new grid) instead of reseeding from blocks.

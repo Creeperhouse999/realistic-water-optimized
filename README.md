@@ -88,8 +88,8 @@ clouds, particles, shadows and water detail in the background.
 - Steps down fast when FPS drops below 90% of the target, two steps if it falls under half. ✅
 - Tries one step up after 20 s steady at the target. A step that causes a drop is blocked for 30 s,
   doubling up to 5 min. ✅
-- Never changes water detail while water is moving, so floods don't vanish mid-wave. ✅
-  Next to a spring (which never stops moving) it lowers water detail after 45 s and raises it back after 3 min. 🧪
+- Only changes water detail when no realistic water exists nearby. Changing it rebuilds all water, which made
+  floods vanish and full tanks burst through their walls; now it uses its other levers instead. ✅
 - Never sets water detail above your own water settings. 🧪
 - **Min view** (never below N chunks) and **Above my view** (allow or forbid going above your own view
   distance). 🧪

@@ -5,26 +5,21 @@ import java.util.Map;
 import me.skaffy.client.water.WaterWorld;
 
 /**
- * Changing a simulation resolution makes the mod rebuild every simulation from the blocks in the world. Fluid
- * that is mid-flow (a wave, a waterfall, a flood) is not stored in blocks yet, so a rebuild makes it vanish.
+ * Changing a simulation resolution makes the mod throw away every simulation and rebuild it from the blocks in the
+ * world (WaterWorld.reload). That rebuild is destructive:
+ * - fluid that is mid-flow (a wave, a waterfall, a flood) is not stored in blocks yet, so it vanishes;
+ * - a full, settled tank rebuilt at the new resolution can burst through its walls (seen in game on 2026-11-07:
+ *   a 13-deep glass tank leaked through intact glass right after resolution 2 -> 1 and 1 -> 2).
  *
- * Auto FPS therefore never changes a resolution while any realistic fluid is moving. The change is queued
- * and applied on the first check where everything is calm (or there is no fluid at all).
- *
- * Springs (converted waterfalls, infinite sources) keep water moving forever. So a change that LOWERS a resolution
- * is applied anyway after {@link #MAX_WAIT_MS}: when the frame rate is too low, losing some moving water is better
- * than staying slow. Raising is applied anyway after {@link #MAX_RAISE_WAIT_MS}, so water detail comes back near a
- * spring (Auto FPS never raises above the player's own setting, see WaterCap).
+ * So Auto FPS only changes a resolution when there is no realistic fluid simulated at all ("Nothing simulated
+ * right now"), and never forces it. While water exists it uses its other levers (view distance, physics steps,
+ * surface detail, foam), which don't rebuild anything.
  */
 public final class SafeResolution {
    /** Settings whose change triggers a full rebuild in WaterWorld.tick. */
    static final java.util.Set<String> REBUILDING = java.util.Set.of("resolution", "lavaResolution", "slimeResolution", "sandResolution", "leafResolution");
 
-   static final long MAX_WAIT_MS = 45_000;
-   static final long MAX_RAISE_WAIT_MS = 180_000;
-
    private static final Map<String, String> pending = new LinkedHashMap<>();
-   private static final Map<String, Long> queuedAt = new java.util.HashMap<>();
    private static long lastCheck;
    private static boolean lastIdle = true;
 
@@ -35,7 +30,7 @@ public final class SafeResolution {
       return REBUILDING.contains(name);
    }
 
-   /** Sets a setting now if it does not rebuild or the fluid is calm; otherwise queues it. Returns true if applied now. */
+   /** Sets a setting now if it does not rebuild or nothing is simulated; otherwise queues it. Returns true if applied now. */
    public static boolean set(String name, String value) {
       if (!rebuilds(name) || idle()) {
          cancel(name);
@@ -43,16 +38,7 @@ public final class SafeResolution {
          return true;
       }
 
-      String current = WaterPresets.get(name);
-      String previous = pending.put(name, value);
-      // The wait for a forced reduction starts when the queue first asks for a reduction, not when an earlier
-      // raise was queued. Re-queuing the same kind of change (Auto FPS does every check) keeps the timer.
-      boolean reduction = isReduction(value, current);
-      boolean wasReduction = previous != null && isReduction(previous, current);
-      if (!queuedAt.containsKey(name) || reduction && !wasReduction) {
-         queuedAt.put(name, System.currentTimeMillis());
-      }
-
+      pending.put(name, value);
       return false;
    }
 
@@ -65,56 +51,24 @@ public final class SafeResolution {
    /** A manual change of the same setting wins over a queued Auto FPS change. */
    public static void cancel(String name) {
       pending.remove(name);
-      queuedAt.remove(name);
    }
 
    public static boolean hasPending() {
       return !pending.isEmpty();
    }
 
-   /** Called once a second from the client tick. Applies queued changes when nothing is flowing, or overdue reductions. */
+   /** Called once a second from the client tick. Applies queued changes once nothing is simulated. */
    public static void tick() {
-      if (pending.isEmpty()) {
+      if (pending.isEmpty() || !idle()) {
          return;
       }
 
-      boolean calm = idle();
-      long now = System.currentTimeMillis();
-      boolean changed = false;
       for (Map.Entry<String, String> e : java.util.List.copyOf(pending.entrySet())) {
-         String name = e.getKey();
-         if (calm || overdue(name, e.getValue(), WaterPresets.get(name), queuedAt.getOrDefault(name, now), now)) {
-            cancel(name);
-            WaterPresets.setRaw(name, e.getValue());
-            changed = true;
-         }
+         WaterPresets.setRaw(e.getKey(), e.getValue());
       }
 
-      if (changed) {
-         me.skaffy.client.water.WaterSettings.save();
-      }
-   }
-
-   /** A queued change that has waited long enough to be applied while water still moves. */
-   static boolean overdue(String name, String queued, String current, long since, long now) {
-      if (!rebuilds(name)) {
-         return false;
-      }
-
-      long waited = now - since;
-      if (isReduction(queued, current)) {
-         return waited >= MAX_WAIT_MS;
-      }
-
-      return isReduction(current, queued) && waited >= MAX_RAISE_WAIT_MS;
-   }
-
-   static boolean isReduction(String queued, String current) {
-      try {
-         return Integer.parseInt(queued) < Integer.parseInt(current);
-      } catch (NumberFormatException e) {
-         return false;
-      }
+      pending.clear();
+      me.skaffy.client.water.WaterSettings.save();
    }
 
    /** Applies all queued changes right away (game closing, so a rebuild does not matter). */
@@ -124,10 +78,9 @@ public final class SafeResolution {
       }
 
       pending.clear();
-      queuedAt.clear();
    }
 
-   /** True when no realistic fluid, sand or leaves are being simulated. Cached for half a second. */
+   /** True when no realistic water, lava, slime, sand or leaves are simulated at all. Cached for half a second. */
    public static boolean idle() {
       long now = System.currentTimeMillis();
       if (now - lastCheck < 500) {
@@ -135,18 +88,23 @@ public final class SafeResolution {
       }
 
       lastCheck = now;
-      lastIdle = countSimulated() == 0; // -1 (unknown) counts as busy
+      lastIdle = countBodies() == 0; // -1 (unknown) counts as busy
       return lastIdle;
    }
 
    static long countSimulated() {
-      String line;
-      try {
-         line = WaterWorld.get().statsLine();
-      } catch (RuntimeException e) {
-         return -1;
-      }
+      return WaterStats.simulated(statsLine());
+   }
 
-      return WaterStats.simulated(line);
+   static long countBodies() {
+      return WaterStats.bodies(statsLine());
+   }
+
+   private static String statsLine() {
+      try {
+         return WaterWorld.get().statsLine();
+      } catch (RuntimeException e) {
+         return null;
+      }
    }
 }

@@ -200,17 +200,10 @@ public final class PerfTests {
    }
 
    private static void overdueReductions() {
-      long t = 1_000_000;
-      long late = t + SafeResolution.MAX_WAIT_MS;
-      long raiseLate = t + SafeResolution.MAX_RAISE_WAIT_MS;
-      check(SafeResolution.overdue("resolution", "1", "2", t, late), "lowering resolution is applied after the wait");
-      check(!SafeResolution.overdue("resolution", "1", "2", t, late - 1), "lowering resolution waits first");
-      check(!SafeResolution.overdue("resolution", "3", "2", t, late), "raising waits longer than lowering");
-      check(SafeResolution.overdue("resolution", "3", "2", t, raiseLate), "raising is applied after the long wait (springs)");
-      check(!SafeResolution.overdue("resolution", "2", "2", t, raiseLate * 10), "same value is not forced");
-      check(!SafeResolution.overdue("whitewater", "false", "true", t, raiseLate * 10), "only rebuild settings are queued");
-      check(!SafeResolution.overdue("sandResolution", "x", "4", t, raiseLate * 10), "garbage value is not forced");
-      check(SafeResolution.overdue("leafResolution", "4", "6", t, late), "leaf resolution reduction is applied after the wait");
+      equal(8L, WaterStats.bodies(statsLine(Locale.US, 0, 0, 0, 0, 0, 0, 3.0)), "settled bodies still count (3 water, 1 lava, 1 slime, 2 sand, 1 leaf pile)");
+      equal(0L, WaterStats.bodies("Nothing simulated right now (place a Realistic Water Bucket or Realistic Sand, or use /fill)"), "empty world has no bodies");
+      equal(-1L, WaterStats.bodies(null), "missing line is unknown");
+      equal(1203L, WaterStats.bodies(String.format(Locale.GERMANY, "%,d water bodies  fluid 0  |  0 lava bodies  |  0 slime bodies  |  0 sand bodies  |  0 leaf piles", 1203)), "localized body count");
 
       equal("2", WaterCap.cap("resolution", "4", "2"), "Auto FPS never raises water resolution above the player's");
       equal("1", WaterCap.cap("resolution", "1", "2"), "Auto FPS can still lower it");

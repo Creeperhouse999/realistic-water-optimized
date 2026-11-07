@@ -32,3 +32,6 @@ Thumbs.db
 
 # Local agent state
 .claude/
+
+# Screenshots waiting for the maintainer to approve (never publish unapproved)
+docs/gallery-candidates/

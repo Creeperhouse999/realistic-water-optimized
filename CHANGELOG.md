@@ -12,9 +12,9 @@ All versions are forks of Realistic Water **1.3** by Skaffy for Minecraft 26.3.
 - Offline tests (`sh tools/test.sh`): presets, panel setting names, patched defaults, stats parsing, memory guard.
 
 ### Fixed
-- Water vanished while Auto FPS changed quality: water detail now only changes while no water is moving. Lowering it is forced after 45 s (springs never stop moving).
+- Water vanished, and full tanks burst through their walls, when Auto FPS changed water detail (a resolution change rebuilds all water). Auto FPS now only changes water detail when no realistic water is simulated at all.
 - Auto FPS could leave its temporary settings in options.txt and the water settings file (closing the panel saved them; a crash kept them). Your own settings are now also stored in the panel config while Auto FPS runs and come back after a crash. Water settings you change while Auto FPS is on are kept for when it is off.
-- Auto FPS climbed above your own water settings while the water was calm (up to resolution 4 with foam), so the next flood crashed it to the lowest level. It now never goes above your own water settings, and near springs water detail comes back after 3 minutes.
+- Auto FPS climbed above your own water settings while the water was calm (up to resolution 4 with foam), so the next flood crashed it to the lowest level. It now never goes above your own water settings.
 - An ocean next to a lake could block that lake from converting (the skip list was per chunk, now per block).
 - Long help text in the panel was cut off after two lines.
 - The panel key was Page Up instead of K on Minecraft 26.3 (new key codes). Existing Page Up bindings are moved to K once.
