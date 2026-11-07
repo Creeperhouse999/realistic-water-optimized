@@ -2,7 +2,7 @@
 
 All versions are forks of Realistic Water **1.3** by Skaffy for Minecraft 26.3.
 
-## 1.3-perf.2 (unreleased)
+## 1.3-perf.2 (2026-11-07)
 ### Added
 - Tabbed control panel (Home, Auto FPS, World, Water, Materials, All settings). It replaces the original settings list: `K`, `/waterpanel`, `/water gui` and both Sodium buttons open it.
 - **Ocean** preset for huge water bodies.
