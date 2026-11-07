@@ -26,6 +26,7 @@ public final class PerfTests {
       panelLayout();
       patchedDefaults();
       overdueReductions();
+      baselineRoundTrip();
 
       System.out.println(checks + " checks, " + failures.size() + " failed");
       for (String f : failures) {
@@ -208,5 +209,19 @@ public final class PerfTests {
       check(!SafeResolution.overdueReduction("whitewater", "false", "true", t, late * 10), "only rebuild settings are queued");
       check(!SafeResolution.overdueReduction("sandResolution", "x", "4", t, late * 10), "garbage value is not forced");
       check(SafeResolution.overdueReduction("leafResolution", "4", "6", t, late), "leaf resolution reduction is applied after the wait");
+   }
+
+   private static void baselineRoundTrip() {
+      java.util.Map<String, String> kv = new java.util.LinkedHashMap<>();
+      kv.put("rd", "12");
+      kv.put("clouds", "FANCY");
+      kv.put("entity", "0.75");
+      kv.put("w.resolution", "2");
+      kv.put("w.whitewater", "false");
+      equal(kv, KeyValues.decode(KeyValues.encode(kv)), "Auto FPS baseline text survives the config file");
+      equal(new java.util.LinkedHashMap<String, String>(), KeyValues.decode(""), "empty text is no values");
+      equal(new java.util.LinkedHashMap<String, String>(), KeyValues.decode(null), "missing text is no values");
+      equal("1", KeyValues.decode("a=1;junk;=x").get("a"), "broken parts are skipped");
+      check(!KeyValues.decode("a=1;junk;=x").containsKey(""), "empty key is skipped");
    }
 }

@@ -87,10 +87,14 @@ public final class AutoFps {
       }
 
       PanelConfig.autoFps = on;
-      PanelConfig.save();
       if (on) {
-         baseline = Baseline.capture(mc.options);
-         level = startLevel(mc.options);
+         // A baseline still on disk means the game stopped without restoring it (crash): the live options are
+         // Auto FPS's old temporary values, so trust the saved baseline instead.
+         Baseline saved = Baseline.parse(PanelConfig.autoFpsBaseline);
+         baseline = saved != null ? saved : Baseline.capture(mc.options);
+         PanelConfig.autoFpsBaseline = baseline.serialize();
+         PanelConfig.save();
+         level = startLevel(baseline.renderDistance());
          apply(mc, LEVELS[level]);
          resetTimers(System.currentTimeMillis());
       } else {
@@ -99,9 +103,38 @@ public final class AutoFps {
             baseline = null;
          }
 
+         PanelConfig.autoFpsBaseline = "";
+         PanelConfig.save();
+         mc.options.save();
+         me.skaffy.client.water.WaterSettings.save();
          level = -1;
          samples.clear();
       }
+   }
+
+   /** The player changed a setting by hand. If Auto FPS manages it, that is the value to give back later. */
+   static void playerChanged(String name, String value) {
+      if (baseline != null && baseline.water().containsKey(name)) {
+         baseline.water().put(name, value);
+         PanelConfig.autoFpsBaseline = baseline.serialize();
+      }
+   }
+
+   /** Auto FPS is off but a baseline is still saved (crash, then Auto FPS switched off in the file): put it back once. */
+   private static void recoverOrphanedBaseline(Minecraft mc) {
+      if (PanelConfig.autoFpsBaseline.isEmpty()) {
+         return;
+      }
+
+      Baseline saved = Baseline.parse(PanelConfig.autoFpsBaseline);
+      if (saved != null) {
+         saved.restore(mc.options);
+         mc.options.save();
+         me.skaffy.client.water.WaterSettings.save();
+      }
+
+      PanelConfig.autoFpsBaseline = "";
+      PanelConfig.save();
    }
 
    /**
@@ -116,14 +149,15 @@ public final class AutoFps {
          SafeResolution.flush();
          mc.options.save();
          me.skaffy.client.water.WaterSettings.save();
+         PanelConfig.autoFpsBaseline = ""; // restored cleanly; Auto FPS captures a fresh one next launch
+         PanelConfig.save();
       } else if (SafeResolution.hasPending()) {
          SafeResolution.flush();
          me.skaffy.client.water.WaterSettings.save();
       }
    }
 
-   private static int startLevel(Options options) {
-      int rd = options.renderDistance().get();
+   private static int startLevel(int rd) {
       int best = 0;
       for (int i = 0; i < LEVELS.length; i++) {
          if (LEVELS[i].renderDistance() <= rd) {
@@ -159,6 +193,7 @@ public final class AutoFps {
    public static void tick(Minecraft mc) {
       lastFps = mc.getFps();
       if (!PanelConfig.autoFps) {
+         recoverOrphanedBaseline(mc);
          return;
       }
 
@@ -305,6 +340,51 @@ public final class AutoFps {
          );
       }
 
+      /** For PanelConfig (see {@link KeyValues}). */
+      String serialize() {
+         Map<String, String> kv = new LinkedHashMap<>();
+         kv.put("rd", String.valueOf(this.renderDistance));
+         kv.put("clouds", this.clouds.name());
+         kv.put("particles", this.particles.name());
+         kv.put("shadows", String.valueOf(this.entityShadows));
+         kv.put("entity", String.valueOf(this.entityDistance));
+         kv.put("weather", String.valueOf(this.weatherRadius));
+         for (Map.Entry<String, String> e : this.water.entrySet()) {
+            kv.put("w." + e.getKey(), e.getValue());
+         }
+
+         return KeyValues.encode(kv);
+      }
+
+      /** Null if empty or unreadable. */
+      static Baseline parse(String s) {
+         if (s == null || s.isBlank()) {
+            return null;
+         }
+
+         try {
+            Map<String, String> kv = KeyValues.decode(s);
+            Map<String, String> water = new LinkedHashMap<>();
+            for (Map.Entry<String, String> e : kv.entrySet()) {
+               if (e.getKey().startsWith("w.")) {
+                  water.put(e.getKey().substring(2), e.getValue());
+               }
+            }
+
+            return new Baseline(
+               Integer.parseInt(kv.get("rd")),
+               CloudStatus.valueOf(kv.get("clouds")),
+               ParticleStatus.valueOf(kv.get("particles")),
+               Boolean.parseBoolean(kv.get("shadows")),
+               Double.parseDouble(kv.get("entity")),
+               Integer.parseInt(kv.get("weather")),
+               water
+            );
+         } catch (RuntimeException e) {
+            return null;
+         }
+      }
+
       void restore(Options o) {
          setIfChanged(o.renderDistance(), this.renderDistance);
          setIfChanged(o.cloudStatus(), this.clouds);
@@ -312,9 +392,11 @@ public final class AutoFps {
          setIfChanged(o.entityShadows(), this.entityShadows);
          setIfChanged(o.entityDistanceScaling(), this.entityDistance);
          setIfChanged(o.weatherRadius(), this.weatherRadius);
+         // The player asked for their settings back: apply them now, even if that rebuilds moving water.
          for (Map.Entry<String, String> e : this.water.entrySet()) {
-            if (!e.getValue().isEmpty() && !e.getValue().equals(SafeResolution.effective(e.getKey()))) {
-               SafeResolution.set(e.getKey(), e.getValue());
+            SafeResolution.cancel(e.getKey());
+            if (!e.getValue().isEmpty() && !e.getValue().equals(WaterPresets.get(e.getKey()))) {
+               WaterPresets.setRaw(e.getKey(), e.getValue());
             }
          }
       }

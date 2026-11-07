@@ -37,7 +37,7 @@ public final class SafeResolution {
    public static boolean set(String name, String value) {
       if (!rebuilds(name) || idle()) {
          cancel(name);
-         WaterPresets.set(name, value);
+         WaterPresets.setRaw(name, value);
          return true;
       }
 
@@ -82,7 +82,8 @@ public final class SafeResolution {
       for (Map.Entry<String, String> e : java.util.List.copyOf(pending.entrySet())) {
          String name = e.getKey();
          if (calm || overdueReduction(name, e.getValue(), WaterPresets.get(name), queuedAt.getOrDefault(name, now), now)) {
-            WaterPresets.set(name, e.getValue()); // also removes it from pending
+            cancel(name);
+            WaterPresets.setRaw(name, e.getValue());
             changed = true;
          }
       }
@@ -112,7 +113,7 @@ public final class SafeResolution {
    /** Applies all queued changes right away (game closing, so a rebuild does not matter). */
    public static void flush() {
       for (Map.Entry<String, String> e : java.util.List.copyOf(pending.entrySet())) {
-         WaterPresets.set(e.getKey(), e.getValue());
+         WaterPresets.setRaw(e.getKey(), e.getValue());
       }
 
       pending.clear();

@@ -142,8 +142,18 @@ public final class WaterPresets {
       WaterSettings.save();
    }
 
-   static void set(String name, String value) {
+   /**
+    * A change the player made (panel, preset, Sodium page). Wins over a queued Auto FPS change, and while Auto FPS
+    * runs it also becomes the value Auto FPS gives back when it is turned off.
+    */
+   public static void set(String name, String value) {
       SafeResolution.cancel(name);
+      AutoFps.playerChanged(name, value);
+      setRaw(name, value);
+   }
+
+   /** Sets the live value only (Auto FPS and queued changes). */
+   static void setRaw(String name, String value) {
       try {
          WaterSettings.set(name, value);
       } catch (NumberFormatException | ReflectiveOperationException e) {

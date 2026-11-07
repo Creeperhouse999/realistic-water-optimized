@@ -141,11 +141,6 @@ public final class SodiumOptions implements ConfigEntryPoint {
    }
 
    private static void set(String name, String value) {
-      me.skaffy.perf.SafeResolution.cancel(name);
-      try {
-         WaterSettings.set(name, value);
-      } catch (NumberFormatException | ReflectiveOperationException var3) {
-         RealisticWater.LOGGER.warn("Couldn't set {} to {}", new Object[]{name, value, var3});
-      }
+      me.skaffy.perf.WaterPresets.set(name, value);
    }
 }

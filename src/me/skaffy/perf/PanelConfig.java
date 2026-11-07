@@ -38,6 +38,11 @@ public final class PanelConfig {
    public static String preset = WaterPresets.Preset.TSUNAMI.name();
    /** Set once the old Page Up key binding has been moved to K, so a deliberate Page Up binding is kept. */
    public static boolean keyMigrated = false;
+   /**
+    * The player's own settings while Auto FPS holds temporary ones (AutoFps.Baseline, serialized), empty when Auto
+    * FPS is off. Written as soon as Auto FPS starts, so after a crash the real settings can still be put back.
+    */
+   public static String autoFpsBaseline = "";
 
    private PanelConfig() {
    }
@@ -64,6 +69,7 @@ public final class PanelConfig {
       notify = Boolean.parseBoolean(p.getProperty("notify", String.valueOf(notify)));
       preset = p.getProperty("preset", preset);
       keyMigrated = Boolean.parseBoolean(p.getProperty("keyMigrated", "false"));
+      autoFpsBaseline = p.getProperty("autoFpsBaseline", "");
       try {
          targetFps = clamp(Integer.parseInt(p.getProperty("targetFps", String.valueOf(targetFps))), 20, 240);
       } catch (NumberFormatException ignored) {
@@ -83,6 +89,7 @@ public final class PanelConfig {
       p.setProperty("notify", String.valueOf(notify));
       p.setProperty("preset", preset);
       p.setProperty("keyMigrated", String.valueOf(keyMigrated));
+      p.setProperty("autoFpsBaseline", autoFpsBaseline);
       Path file = file();
       try {
          Files.createDirectories(file.getParent());

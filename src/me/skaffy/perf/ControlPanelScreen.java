@@ -153,7 +153,7 @@ public class ControlPanelScreen extends OptionsSubScreen {
 
    @Override
    public void removed() {
-      super.removed();
+      // Not super.removed(): OptionsSubScreen.removed() saves options.txt unconditionally (26.3 bytecode).
       PanelConfig.save();
       WaterSettings.save();
       // While Auto FPS runs, the live options are its temporary choices; saving them would overwrite the
@@ -194,7 +194,7 @@ public class ControlPanelScreen extends OptionsSubScreen {
 
       this.heading("Quick settings");
       if (PanelConfig.autoFps) {
-         this.note("Auto FPS is on: it manages view distance and water detail, so changes here are temporary.");
+         this.note("Auto FPS is on: it changes view distance and water detail as you play. Water settings you pick are kept for when it is off.");
       }
 
       this.list.addSmall(this.options.renderDistance(), this.options.simulationDistance());
@@ -452,6 +452,20 @@ public class ControlPanelScreen extends OptionsSubScreen {
       @Override
       public void onRelease(net.minecraft.client.input.MouseButtonEvent event) {
          super.onRelease(event);
+         this.commit();
+      }
+
+      @Override
+      public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+         boolean used = super.keyPressed(event);
+         if (used) {
+            this.commit(); // arrow keys move the slider without a mouse release
+         }
+
+         return used;
+      }
+
+      private void commit() {
          if (this.onRelease) {
             String v = WaterSettingsScreen.format(this.info, this.picked());
             if (!v.equals(WaterPresets.get(this.info.name()))) {
@@ -466,14 +480,14 @@ public class ControlPanelScreen extends OptionsSubScreen {
       private static final int MAX = 144;
 
       TargetSlider() {
-         super(0, 0, 150, 20, Component.empty(), (PanelConfig.targetFps - MIN) / (double)(MAX - MIN));
+         super(0, 0, 150, 20, Component.empty(), Math.clamp((PanelConfig.targetFps - MIN) / (double)(MAX - MIN), 0.0, 1.0));
          this.setTooltip(Tooltip.create(Component.literal("The FPS Auto FPS aims for. It never goes above your Max Framerate setting.")));
          this.updateMessage();
       }
 
       private int picked() {
          int v = (int)Math.round(MIN + this.value * (MAX - MIN));
-         return Math.round(v / 5.0F) * 5;
+         return Math.clamp(Math.round(v / 5.0F) * 5, MIN, MAX);
       }
 
       @Override
@@ -532,6 +546,20 @@ public class ControlPanelScreen extends OptionsSubScreen {
       @Override
       public void onRelease(net.minecraft.client.input.MouseButtonEvent event) {
          super.onRelease(event);
+         this.commit();
+      }
+
+      @Override
+      public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+         boolean used = super.keyPressed(event);
+         if (used) {
+            this.commit();
+         }
+
+         return used;
+      }
+
+      private void commit() {
          int v = this.picked();
          this.server.execute(() -> this.server.overworld().getGameRules().set(this.rule, v, this.server));
       }
