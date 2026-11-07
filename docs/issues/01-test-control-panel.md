@@ -11,3 +11,6 @@ The tabbed panel (Home, Auto FPS, World, Water, Materials, All settings) compile
 - [ ] Notes (two-line text) don't overlap the next row
 - [ ] Sliders for resolution settings apply on release only
 - [ ] Reset to preset works
+- [ ] Auto FPS on, close the panel: options.txt keeps your own view distance
+- [ ] Auto FPS on, kill the game (Task Manager), relaunch: your own settings come back (panel config key autoFpsBaseline)
+- [ ] Arrow keys on a resolution or World slider apply the value
