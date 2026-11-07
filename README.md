@@ -11,7 +11,7 @@ Auto FPS that keeps your frame rate, and an option to turn the lakes of your wor
 [![Requires Fabric API](https://img.shields.io/badge/Requires-Fabric%20API-3B3B3B?style=flat-square)](https://modrinth.com/mod/fabric-api)
 [![Based on Realistic Water 1.3](https://img.shields.io/badge/Based%20on-Realistic%20Water%201.3-2E86C1?style=flat-square)](https://github.com/sskaffy/Realistic-Water)
 [![Release 1.3-perf.3](https://img.shields.io/badge/Release-1.3--perf.3-5865F2?style=flat-square)](../../releases)
-[![Modrinth](https://img.shields.io/badge/Modrinth-Realistic%20Water%20OPTIMIZED-1BD96A?style=flat-square&logo=modrinth&logoColor=white)](https://modrinth.com/mod/realistic-water-optimized)
+[![Modrinth](https://img.shields.io/badge/Modrinth-Realistic%20Water%20--%20OPTIMIZED-1BD96A?style=flat-square&logo=modrinth&logoColor=white)](https://modrinth.com/mod/realistic-water-optimized)
 [![Made with Claude](https://img.shields.io/badge/Made%20with-Claude-D97757?style=flat-square)](https://claude.com/claude-code)
 
 [Download](https://modrinth.com/mod/realistic-water-optimized) ·
