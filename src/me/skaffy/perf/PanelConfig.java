@@ -43,6 +43,10 @@ public final class PanelConfig {
     * FPS is off. Written as soon as Auto FPS starts, so after a crash the real settings can still be put back.
     */
    public static String autoFpsBaseline = "";
+   /** Auto FPS never sets the view distance below this (2 = no limit). */
+   public static int minView = 2;
+   /** Auto FPS may raise the view distance above the player's own setting. */
+   public static boolean aboveOwnView = true;
 
    private PanelConfig() {
    }
@@ -70,6 +74,11 @@ public final class PanelConfig {
       preset = p.getProperty("preset", preset);
       keyMigrated = Boolean.parseBoolean(p.getProperty("keyMigrated", "false"));
       autoFpsBaseline = p.getProperty("autoFpsBaseline", "");
+      aboveOwnView = Boolean.parseBoolean(p.getProperty("aboveOwnView", "true"));
+      try {
+         minView = clamp(Integer.parseInt(p.getProperty("minView", "2")), 2, 16);
+      } catch (NumberFormatException ignored) {
+      }
       try {
          targetFps = clamp(Integer.parseInt(p.getProperty("targetFps", String.valueOf(targetFps))), 20, 240);
       } catch (NumberFormatException ignored) {
@@ -90,6 +99,8 @@ public final class PanelConfig {
       p.setProperty("preset", preset);
       p.setProperty("keyMigrated", String.valueOf(keyMigrated));
       p.setProperty("autoFpsBaseline", autoFpsBaseline);
+      p.setProperty("minView", String.valueOf(minView));
+      p.setProperty("aboveOwnView", String.valueOf(aboveOwnView));
       Path file = file();
       try {
          Files.createDirectories(file.getParent());

@@ -219,6 +219,11 @@ public final class PerfTests {
       equal("false", WaterCap.cap("whitewater", "false", "true"), "Auto FPS can still switch foam off");
       equal("4", WaterCap.cap("resolution", "4", null), "no baseline: level value");
       equal("4", WaterCap.cap("resolution", "4", "x"), "unreadable own value: level value");
+      equal(20, WaterCap.view(20, 10, 2, true), "view may go above own when allowed");
+      equal(10, WaterCap.view(20, 10, 2, false), "view capped at own when not allowed");
+      equal(8, WaterCap.view(5, 10, 8, false), "min view raises potato view");
+      equal(5, WaterCap.view(5, 0, 2, false), "unknown own view: level value");
+      equal(12, WaterCap.view(5, 10, 12, false), "min view wins over own cap");
    }
 
    private static void baselineRoundTrip() {

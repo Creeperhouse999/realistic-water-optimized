@@ -7,6 +7,7 @@ All versions are forks of Realistic Water **1.3** by Skaffy for Minecraft 26.3.
 - Tabbed control panel (Home, Auto FPS, World, Water, Materials, All settings). It replaces the original settings list: `K`, `/waterpanel`, `/water gui` and both Sodium buttons open it.
 - **Ocean** preset for huge water bodies.
 - Realistic world game rules (`realistic-water:convert_water`, `convert_lava`, `convert_sand`, `convert_radius`, `convert_per_second`, `convert_max_body`), visible in Create World → Game Rules and in the panel's World tab. Lakes are converted whole (a half-converted lake would drain into its vanilla half); oceans stay vanilla; waterfall tops become springs.
+- Auto FPS options: **Min view** (never below N chunks) and **Above my view** (allow or forbid view distance above your own).
 - GPU memory guard: very large floods lower surface detail for that region instead of failing to allocate GPU memory. The limit scales with video memory (1/14 of it, 96–576 MB per region).
 - Offline tests (`sh tools/test.sh`): presets, panel setting names, patched defaults, stats parsing, memory guard.
 

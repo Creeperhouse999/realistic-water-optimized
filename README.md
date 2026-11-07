@@ -47,7 +47,8 @@ Like the dynamic settings in flight simulators: pick a target (say 60 FPS) and i
 - Tries one step up after 20 s steady at the target. A step that causes a drop is blocked for 30 s, doubling up to 5 min.
 - Never changes water detail while water is moving, so floods don't vanish mid-wave.
 - Never touches mipmaps, texture filtering or biome blend (they reload everything).
-- Turning it off, or quitting, restores your own settings.
+- Water detail never goes above your own water settings. View distance can: set **Above my view: Never** to stop that, and **Min view** to keep it from dropping too low.
+- Turning it off, or quitting, restores your own settings (also after a crash).
 
 `/autofps on`, `/autofps off`, `/autofps target 60`, `/autofps` (status).
 

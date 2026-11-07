@@ -244,6 +244,15 @@ public class ControlPanelScreen extends OptionsSubScreen {
             PanelConfig.save();
          });
       this.list.addSmall(adjust, notify);
+      CycleButton<Boolean> aboveOwn = CycleButton.<Boolean>builder(v -> Component.literal(v ? "Allowed" : "Never"), PanelConfig.aboveOwnView)
+         .withValues(List.of(true, false))
+         .withTooltip(v -> Tooltip.create(Component.literal("Whether Auto FPS may raise the view distance above your own setting when the frame rate allows it.")))
+         .create(Component.literal("Above my view"), (button, v) -> {
+            PanelConfig.aboveOwnView = v;
+            PanelConfig.save();
+            AutoFps.reapply();
+         });
+      this.list.addSmall(new MinViewSlider(), aboveOwn);
       this.autoStatus = this.line(this.autoStatusText());
 
       this.heading("Quality levels");
@@ -254,7 +263,7 @@ public class ControlPanelScreen extends OptionsSubScreen {
             .withStyle(i == AutoFps.level() ? ChatFormatting.GREEN : ChatFormatting.GRAY));
       }
 
-      this.note("Water detail only changes while no water is moving, so floods never vanish mid-wave.");
+      this.note("Water detail never goes above your own water settings. It changes only while no water is moving, so floods don't vanish mid-wave (near springs: lowering after 45 s, raising after 3 min).");
    }
 
    private void world() {
@@ -477,6 +486,40 @@ public class ControlPanelScreen extends OptionsSubScreen {
                WaterPresets.set(this.info.name(), v);
             }
          }
+      }
+   }
+
+   /** Lowest view distance Auto FPS may use. */
+   private static final class MinViewSlider extends AbstractSliderButton {
+      private static final int MIN = 2;
+      private static final int MAX = 16;
+
+      MinViewSlider() {
+         super(0, 0, 150, 20, Component.empty(), Math.clamp((PanelConfig.minView - MIN) / (double)(MAX - MIN), 0.0, 1.0));
+         this.setTooltip(Tooltip.create(Component.literal("Auto FPS never lowers the view distance below this. Higher keeps the world visible but may cost FPS.")));
+         this.updateMessage();
+      }
+
+      private int picked() {
+         return (int)Math.round(MIN + this.value * (MAX - MIN));
+      }
+
+      @Override
+      protected void updateMessage() {
+         int v = this.picked();
+         this.setMessage(Component.literal("Min view: " + (v <= MIN ? "no limit" : v + " chunks")));
+      }
+
+      @Override
+      protected void applyValue() {
+         PanelConfig.minView = this.picked();
+      }
+
+      @Override
+      public void onRelease(net.minecraft.client.input.MouseButtonEvent event) {
+         super.onRelease(event);
+         PanelConfig.save();
+         AutoFps.reapply();
       }
    }
 

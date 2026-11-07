@@ -9,6 +9,19 @@ final class WaterCap {
    private WaterCap() {
    }
 
+   /**
+    * View distance Auto FPS should use: the level's, at least {@code minView}, and not above the player's own
+    * ({@code own}, 0 if unknown) unless {@code aboveOwn}.
+    */
+   static int view(int levelView, int own, int minView, boolean aboveOwn) {
+      int v = levelView;
+      if (!aboveOwn && own > 0) {
+         v = Math.min(v, own);
+      }
+
+      return Math.max(v, minView);
+   }
+
    /** The value Auto FPS should use for {@code name}: its level's value, but never above {@code own}. */
    static String cap(String name, String levelValue, String own) {
       if (own == null || own.isEmpty()) {

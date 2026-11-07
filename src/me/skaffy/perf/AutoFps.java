@@ -112,6 +112,13 @@ public final class AutoFps {
       }
    }
 
+   /** Applies the current level again (after a limit was changed in the panel). */
+   static void reapply() {
+      if (PanelConfig.autoFps && level >= 0) {
+         apply(Minecraft.getInstance(), LEVELS[level]);
+      }
+   }
+
    /** The player changed a setting by hand. If Auto FPS manages it, that is the value to give back later. */
    static void playerChanged(String name, String value) {
       if (baseline != null && baseline.water().containsKey(name)) {
@@ -283,7 +290,8 @@ public final class AutoFps {
    static void apply(Minecraft mc, Level l) {
       if (PanelConfig.adjust.world()) {
          Options o = mc.options;
-         setIfChanged(o.renderDistance(), l.renderDistance());
+         int own = baseline != null ? baseline.renderDistance() : 0;
+         setIfChanged(o.renderDistance(), WaterCap.view(l.renderDistance(), own, PanelConfig.minView, PanelConfig.aboveOwnView));
          setIfChanged(o.cloudStatus(), l.clouds());
          setIfChanged(o.particles(), l.particles());
          setIfChanged(o.entityShadows(), l.entityShadows());
